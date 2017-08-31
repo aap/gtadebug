@@ -28,6 +28,8 @@ struct CPathFind {
 CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 WRAPPER int CPathFind::FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10) {  EAXJMP(0x42CC30); }
 
+static int isPlayerInvincible;
+
 #define FIELD(type, var, offset) *(type*)((uint8*)var + offset)
 
 static const char *carnames[] = {
@@ -104,6 +106,23 @@ spawnCar(int id)
 	}
 }
 
+void __declspec(naked)
+PlayerPedInvincible(void)
+{
+	_asm{
+		mov	eax, isPlayerInvincible
+		test	eax, eax
+		jz	done
+		mov	dword ptr [esi+0x2c0], 0x42C80000 // 100.0f
+	done:
+		add	esp,20h
+		pop	ebp
+		pop	esi
+		pop	ebx
+		retn
+	}
+}
+
 int
 delayedPatches10(int a, int b)
 {
@@ -151,8 +170,7 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Cheats", "Strong grip", [](){ ((void (*)(void))0x491670)(); });
 		DebugMenuAddCmd("Cheats", "Nasty limbs", [](){ ((void (*)(void))0x4916A0)(); });
 
-		static uint8 test;
-		DebugMenuAddVar("Misc", "test", &test, nil, 1, 0, 255, nil);
+		DebugMenuAddVarBool32("Misc", "Invincible", &isPlayerInvincible, nil);
 
 		static int playerId = 0;
 		e = DebugMenuAddVar("Misc", "Player model", &playerId, [](){
@@ -181,6 +199,8 @@ delayedPatches10(int a, int b)
 		});
 
 		installColDebug();
+
+		InjectHook(0x4F0758, PlayerPedInvincible, PATCH_JUMP);
 	}
 	return RsEventHandler_orig(a, b);
 }

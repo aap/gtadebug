@@ -35,6 +35,12 @@ WRAPPER CPad *CPad::GetPad(int id) { EAXJMP(0x492F60); }
 WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes key) { EAXJMP(0x58D2A0); }
 WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes key) { EAXJMP(0x58D8A0); }
 
+
+
+CBaseModelInfo **CModelInfo::ms_modelInfoPtrs; // set later
+WRAPPER CBaseModelInfo *CModelInfo::GetModelInfo(const char *s, int id) { EAXJMP(0x50B860); }
+
+
 WRAPPER void CSprite2d::Draw(CRect const &, CRGBA const &) { EAXJMP(0x51ED50); }
 WRAPPER void CSprite2d::DrawRect(CRect const &,CRGBA const &) { EAXJMP(0x51F970); }
 
@@ -96,6 +102,9 @@ WRAPPER const RwTexDictionary *RwTexDictionaryForAllTextures(const RwTexDictiona
 // ADDRESS
 static uint32_t RwV3dLength_A = AddressByVersion<uint32_t>(0x5A36A0, 0, 0, 0x647030, 0, 0);
 WRAPPER RwReal RwV3dLength(const RwV3d*) { VARJMP(RwV3dLength_A); }
+WRAPPER RwV3d *RwV3dTransformPoints(RwV3d*, const RwV3d*, RwInt32, const RwMatrix*) { EAXJMP(0x5A37D0); }
+
+
 
 static uint32_t RwMatrixCreate_A = AddressByVersion<uint32_t>(0x5A3330, 0x5A35F0, 0x5A3FA0, 0x644620, 0x644670, 0x6435D0);
 WRAPPER RwMatrix *RwMatrixCreate(void) { VARJMP(RwMatrixCreate_A); }

@@ -1,5 +1,4 @@
 #include "debug.h"
-#include "debugmenu_public.h"
 
 DebugMenuAPI gDebugMenuAPI;
 
@@ -7,10 +6,7 @@ HMODULE dllModule;
 int gtaversion = -1;
 
 int (*RsEventHandler_orig)(int a, int b);
-
-void **CModelInfo__ms_modelInfoPtrs = (void**)0x83D408;
 CStreamingInfo *CStreaming__ms_aInfoForModel;
-WRAPPER void *CModelInfo__GetModelInfo(const char *s, int id) { EAXJMP(0x50B860); }
 WRAPPER void CStreaming__RequestModel(int id, int flags) { EAXJMP(0x407EA0); }
 WRAPPER void CStreaming__LoadAllRequestedModels(bool b) { EAXJMP(0x40A440); }
 WRAPPER void CStreaming__SetModelIsDeletable(int id) { EAXJMP(0x40A790); }
@@ -64,7 +60,7 @@ changePlayerModel(int id)
 	int flags;
 
 	playerped = (CPed*)FindPlayerPed();
-	if(playerped->IsPedInControl() && CModelInfo__GetModelInfo("player", 0) && CModelInfo__ms_modelInfoPtrs[id]){
+	if(playerped->IsPedInControl() && CModelInfo::GetModelInfo("player", 0) && CModelInfo::ms_modelInfoPtrs[id]){
 		int animGroup = FIELD(int, playerped, 0x1d4);
 		flags = CStreaming__ms_aInfoForModel[playerped->nModelIndex].flags;
 		((CEntityVMT*)playerped->vtable)->DeleteRwObject(playerped);
@@ -112,18 +108,23 @@ int
 delayedPatches10(int a, int b)
 {
 	// Get some pointers that are likely to be changed by various limit adjusters
-	CModelInfo__ms_modelInfoPtrs = (void**) *(int*)(0x49114F + 3);
+	CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**) *(int*)(0x49114F + 3);
 	CStreaming__ms_aInfoForModel = (CStreamingInfo*) (*(int*)(0x491171 + 4) - 9);
 
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy"
 		};
-		DebugMenuAddVar("Time & Weather", "Current Hour", (uint8*)&CClock::ms_nGameClockHours, nil, 1, 0, 23, nil);
-		DebugMenuAddVar("Time & Weather", "Current Minute", (uint8*)&CClock::ms_nGameClockMinutes,
+		MenuEntry *e;
+		e = DebugMenuAddVar("Time & Weather", "Current Hour", (uint8*)&CClock::ms_nGameClockHours, nil, 1, 0, 23, nil);
+		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "Current Minute", (uint8*)&CClock::ms_nGameClockMinutes,
 			[](){ CWeather::InterpolationValue = CClock::ms_nGameClockMinutes/60.0f; }, 1, 0, 59, nil);
-		DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 3, weathers);
-		DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
+			DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 3, weathers);
+		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
+		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x8F2C20, nil, 0.1f, 0.0f, 10.0f);
 	
 		DebugMenuAddCmd("Cheats", "Weapons", [](){ ((void (*)(void))0x490D90)(); });
@@ -150,15 +151,20 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Cheats", "Strong grip", [](){ ((void (*)(void))0x491670)(); });
 		DebugMenuAddCmd("Cheats", "Nasty limbs", [](){ ((void (*)(void))0x4916A0)(); });
 
+		static uint8 test;
+		DebugMenuAddVar("Misc", "test", &test, nil, 1, 0, 255, nil);
+
 		static int playerId = 0;
-		DebugMenuAddVar("Misc", "Player model", &playerId, [](){
+		e = DebugMenuAddVar("Misc", "Player model", &playerId, [](){
 				if(playerId >= 26 && playerId <= 29 || playerId == 8)
 					return;
 				changePlayerModel(playerId);
 			}, 1, 0, 82, pednames);
+		DebugMenuEntrySetWrap(e, true);
 
 		static int spawnCarId = 90;
-		DebugMenuAddVar("Misc", "Spawn Car ID", &spawnCarId, nil, 1, 90, 150, carnames);
+		e = DebugMenuAddVar("Misc", "Spawn Car ID", &spawnCarId, nil, 1, 90, 150, carnames);
+		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddCmd("Misc", "Spawn Car", [](){
 			if(spawnCarId == 124 || // train
 			   spawnCarId == 125 || // chopper
@@ -174,6 +180,7 @@ delayedPatches10(int a, int b)
 			spawnCar(spawnCarId);
 		});
 
+		installColDebug();
 	}
 	return RsEventHandler_orig(a, b);
 }

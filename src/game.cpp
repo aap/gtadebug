@@ -62,8 +62,15 @@ WRAPPER void CFont::SetRightJustifyWrap(float)                       { EAXJMP(0x
 WRAPPER void CFont::SetDropShadowPosition(short)                     { EAXJMP(0x501E70); }
 WRAPPER double CFont::GetStringWidth(ushort *str, bool spc)          { EAXJMP(0x5018A0); }
 
+WRAPPER void CMatrix::SetRotate(float x, float y, float z) { EAXJMP(0x4B93A0); }
+
 WRAPPER CEntity *FindPlayerPed(void) { EAXJMP(0x4A1150); }
 WRAPPER CEntity *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
+WRAPPER void FindPlayerCoors(CVector*) { EAXJMP(0x4A1030); }
+
+WRAPPER bool CPed::IsPedInControl(void) { EAXJMP(0x4CE6C0); }
+
+WRAPPER CAutomobile *CAutomobile::ctor(int id, uint8 type) { EAXJMP(0x52C6B0); }
 
 WRAPPER void AsciiToUnicode(char const *,ushort *) { EAXJMP(0x5009C0); }
 WRAPPER void debug(const char *fmt, ...) { EAXJMP(0x405DB0); }

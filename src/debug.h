@@ -87,6 +87,19 @@ public:
 	RwMatrix matrix;
 	RwMatrix *pMatrix;
 	bool haveRwMatrix;
+
+	void SetRotate(float x, float y, float z);
+};
+
+struct CStreamingInfo
+{
+	CStreamingInfo *next;
+	CStreamingInfo *prev;
+	uint8 loadState;
+	uint8 flags;
+	int16 nextID;
+	int position;
+	int size;
 };
 
 struct CPlaceable
@@ -126,10 +139,10 @@ struct CEntityVMT
 	void (__cdecl *dtor)(void *);
 	int Add;
 	int Remove;
-	int SetModelIndex;
-	void (__cdecl *SetModelIndexNoCreate)(uint);
+	void (__thiscall *SetModelIndex)(CEntity *e, int16 id);
+	void (__thiscall *SetModelIndexNoCreate)(CEntity *e, uint);
 	int CreateRwObject;
-	int DeleteRwObject;
+	void (__thiscall *DeleteRwObject)(CEntity *e);
 	CRect *(__thiscall *GetBoundRect)(CEntity *e, CRect *ret);
 	int ProcessControl;
 	int ProcessCollision;
@@ -187,11 +200,20 @@ static_assert(sizeof(CPhysical) == 0x128, "CPhysical: wrong size");
 struct CPed : CEntity
 {
 	int pad;
+
+	bool IsPedInControl(void);
 };
 
 struct CVehicle : CEntity
 {
 	int pad;
+};
+
+struct CAutomobile : CVehicle
+{
+	int pad;
+
+	CAutomobile *ctor(int id, uint8 type);
 };
 
 struct CCam {
@@ -699,3 +721,4 @@ public:
 
 CEntity *FindPlayerPed(void);
 CEntity *FindPlayerVehicle(void);
+void FindPlayerCoors(CVector*);

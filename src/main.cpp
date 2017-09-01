@@ -14,6 +14,29 @@ WRAPPER void CStreaming__SetModelIsDeletable(int id) { EAXJMP(0x40A790); }
 WRAPPER CVehicle *CVehicle__new(int size) { EAXJMP(0x551120); }
 WRAPPER void CWorld__Add(CEntity *e) { EAXJMP(0x4AE930); }
 
+
+enum ModelIDs {
+	MODELID_STINGER = 92,
+	MODELID_INFERNUS = 101,
+	MODELID_CHEETAH = 105,
+	MODELID_TAXI = 110,
+	MODELID_POLICE = 116,
+	MODELID_BANSHEE = 119,
+	MODELID_DODO = 126,
+	MODELID_YAKUZA = 136,
+
+	// these crash when spawned
+	MODELID_TRAIN = 124,
+	MODELID_CHOPPER = 125,
+	MODELID_AIRTRAIN = 140,
+	MODELID_DEADDODO = 141,
+	MODELID_ESCAPE = 147,
+	MODELID_PREDATOR = 120,
+	MODELID_SPEEDER = 142,
+	MODELID_REEFER = 143,
+	MODELID_GHOST = 150,
+};
+
 struct PathNode
 {
 	float x, y, z;
@@ -184,19 +207,27 @@ delayedPatches10(int a, int b)
 		e = DebugMenuAddVar("Misc", "Spawn Car ID", &spawnCarId, nil, 1, 90, 150, carnames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddCmd("Misc", "Spawn Car", [](){
-			if(spawnCarId == 124 || // train
-			   spawnCarId == 125 || // chopper
-			   spawnCarId == 140 || // airtrain
-			   spawnCarId == 141 || // deaddodo
-			   spawnCarId == 147 ||  // escape
+			if(spawnCarId == MODELID_TRAIN ||
+			   spawnCarId == MODELID_CHOPPER ||
+			   spawnCarId == MODELID_AIRTRAIN ||
+			   spawnCarId == MODELID_DEADDODO ||
+			   spawnCarId == MODELID_ESCAPE ||
 				// boats crash too
-			   spawnCarId == 120 ||  // predator
-			   spawnCarId == 142 ||  // speeder
-			   spawnCarId == 143 ||  // reefer
-			   spawnCarId == 150)  // ghost
+			   spawnCarId == MODELID_PREDATOR ||
+			   spawnCarId == MODELID_SPEEDER ||
+			   spawnCarId == MODELID_REEFER ||
+			   spawnCarId == MODELID_GHOST)
 				return;
 			spawnCar(spawnCarId);
 		});
+		DebugMenuAddCmd("Misc", "Spawn Stinger", [](){ spawnCar(MODELID_STINGER); });
+		DebugMenuAddCmd("Misc", "Spawn Internus", [](){ spawnCar(MODELID_INFERNUS); });
+		DebugMenuAddCmd("Misc", "Spawn Cheetah", [](){ spawnCar(MODELID_CHEETAH); });
+		DebugMenuAddCmd("Misc", "Spawn Taxi", [](){ spawnCar(MODELID_TAXI); });
+		DebugMenuAddCmd("Misc", "Spawn Police", [](){ spawnCar(MODELID_POLICE); });
+		DebugMenuAddCmd("Misc", "Spawn Banshee", [](){ spawnCar(MODELID_BANSHEE); });
+		DebugMenuAddCmd("Misc", "Spawn Yakuza", [](){ spawnCar(MODELID_YAKUZA); });
+		DebugMenuAddCmd("Misc", "Spawn Dodo", [](){ spawnCar(MODELID_DODO); });
 
 		installColDebug();
 

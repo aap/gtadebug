@@ -1,5 +1,9 @@
-Adds some debugging functionality to GTA III. It is to be used with debugmenu.
+Adds some debugging functionality to GTA III and SA. It is to be used with debugmenu.
 Work in Progress
+
+
+III
+===
 
 Controls (Pad controls refer to the second pad):
 - Ctrl-D or Circle toggle the debug camera
@@ -10,3 +14,9 @@ Debug cam controls:
 - Dragging the mouse or moving the left stick rotates the camera
 - W/S or Square/Cross move the camera forward/backward
 - Enter or R2 teleport the player to the camera position
+
+
+
+SA
+==
+Just the menu for now

@@ -24,6 +24,8 @@ typedef int64_t int64;
 
 #define nil NULL
 
+void patchDebugCam(void);
+
 struct GlobalScene
 {
 	RpWorld *world;
@@ -115,6 +117,7 @@ enum RsKeyCodes
 	rsNULL = 0x420,
 };
 
+#include "common.h"
 #include "game.h"
 
 struct CPostEffects

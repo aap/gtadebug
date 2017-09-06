@@ -123,4 +123,5 @@ enum RsKeyCodes
 	rsNULL = 0x420,
 };
 
+#include "common.h"
 #include "game.h"

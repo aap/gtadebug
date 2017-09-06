@@ -1,5 +1,19 @@
 #include "debug.h"
 
+GlobalScene &Scene = *(GlobalScene*)0xC17038;
+
+WRAPPER CVehicle *FindPlayerVehicle(int, bool) { EAXJMP(0x56E0D0); }
+WRAPPER CPlayerPed *FindPlayerPed(int) { EAXJMP(0x56E210); }
+WRAPPER void CPlayerPed::SetWantedLevel(int n) { EAXJMP(0x609F10); }
+
+WRAPPER void CIplStore::AddIplsNeededAtPosn(CVector *pos) { EAXJMP(0x4045B0); }
+
+WRAPPER void CVector::CrossProduct(CVector *out, CVector *a, CVector *b) { EAXJMP(0x59C730); }
+WRAPPER void CVector::Normalise(void) { EAXJMP(0x59C910); }
+
+WRAPPER void CDraw::SetFOV(float fov) { EAXJMP(0x6FF410); }
+
+
 float &CTimer::ms_fTimeScale = *(float*)0xB7CB64;
 
 int16 &CClock::ms_nGameClockSeconds = *(short*)0xB70150;
@@ -53,3 +67,20 @@ bool &CPostEffects::m_waterEnable = *(bool*)0xC402D3;
 bool &CPostEffects::m_bSpeedFX = *(bool*)0x8D5100;
 bool &CPostEffects::m_bSpeedFXTestMode = *(bool*)0xC402C7;
 uint8 &CPostEffects::m_SpeedFXAlpha = *(uint8*)0x8D5104;
+
+
+CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0xB73418;
+CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0xB7342C;
+
+WRAPPER CPad *CPad::GetPad(int id) { EAXJMP(0x53FB70); }
+
+WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes key) { EAXJMP(0x52DDB0); }
+WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes key) { EAXJMP(0x52E450); }
+
+
+
+//
+// RW
+//
+
+WRAPPER RwCamera *RwCameraSetNearClipPlane(RwCamera*, RwReal) { EAXJMP(0x7EE1D0); }

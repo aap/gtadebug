@@ -1,91 +1,58 @@
 #include "debug.h"
 
-// GTA
+// GTA VC
 
-void **rwengine = *(void***)0x59EEB1;
+GlobalScene &Scene = *(GlobalScene*)0x8100B8;
+CCamera &TheCamera = *(CCamera*)0x7E4688;
 
-GlobalScene &Scene = *(GlobalScene*)0x726768;
-RsGlobalType &RsGlobal = *(RsGlobalType*)0x8F4360;
-CCamera &TheCamera = *(CCamera*)0x6FACF8;
+WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4BC1E0); }
+WRAPPER CPlayerPed *FindPlayerPed(void) { EAXJMP(0x4BC120); }
+WRAPPER void FindPlayerCoors(CVector*) { EAXJMP(0x4BC240); }
 
-WRAPPER void CVector::Normalise(void) { EAXJMP(0x4BA560); };
+WRAPPER void CVector::CrossProduct(CVector *out, CVector *a, CVector *b) { EAXJMP(0x4E00B0); }
+WRAPPER void CVector::Normalise(void) { EAXJMP(0x4DFEA0); }
 
-int &CTimer::m_snTimeInMilliseconds = *(int*)0x885B48;
+WRAPPER void CMatrix::SetRotate(float x, float y, float z) { EAXJMP(0x4DF240); }
 
-char  &CClock::ms_nGameClockHours = *(char*)0x95CDA6;
-char  &CClock::ms_nGameClockMinutes = *(char*)0x95CDC8;
-short &CClock::ms_nGameClockSeconds = *(short*)0x95CC7C;
+CStreamingInfo *CStreaming__ms_aInfoForModel;
+WRAPPER void CStreaming__RequestModel(int id, int flags) { EAXJMP(0x40E310); }
+WRAPPER void CStreaming__LoadAllRequestedModels(bool b) { EAXJMP(0x40B5F0); }
+WRAPPER void CStreaming__SetModelIsDeletable(int id) { EAXJMP(0x40AEA0); }
+WRAPPER void CStreaming__SetModelTxdIsDeletable(int id) { EAXJMP(0x40ADF0); }
 
-float &CWeather::InterpolationValue = *(float*)0x8F2520;
-short &CWeather::OldWeatherType = *(short*)0x95CCEC;
-short &CWeather::NewWeatherType = *(short*)0x95CC70;
+WRAPPER CVehicle *CVehicle__new(int size) { EAXJMP(0x5BAB20); }
+WRAPPER void CWorld__Add(CEntity *e) { EAXJMP(0x4DB3F0); }
 
-WRAPPER void CFileMgr::SetDir(const char *path) { EAXJMP(0x479020); }
-
-WRAPPER void CCoronas::DoSunAndMoon(void){ EAXJMP(0x4FA380); }
-WRAPPER void CCoronas::Update(void){ EAXJMP(0x4F8EC0); }
-
-short *CPad::NewKeyState = (short*)0x6E60D0; // 312
-short *CPad::OldKeyState = (short*)0x6F1E70; // 312
-CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
-CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
-bool &CPad::m_bMapPadOneToPadTwo = *(bool*)0x46D572;
-WRAPPER CPad *CPad::GetPad(int id) { EAXJMP(0x492F60); }
-
-WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes key) { EAXJMP(0x58D2A0); }
-WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes key) { EAXJMP(0x58D8A0); }
+CPathFind &ThePaths = *(CPathFind*)0x9B6E5C;
+WRAPPER int CPathFind::FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10, char a11, char a12) {  EAXJMP(0x437150); }
 
 
-
-CBaseModelInfo **CModelInfo::ms_modelInfoPtrs; // set later
-WRAPPER CBaseModelInfo *CModelInfo::GetModelInfo(const char *s, int id) { EAXJMP(0x50B860); }
+WRAPPER void CDraw::SetFOV(float fov) { EAXJMP(0x54A2E0); }
 
 
-WRAPPER void CSprite2d::Draw(CRect const &, CRGBA const &) { EAXJMP(0x51ED50); }
-WRAPPER void CSprite2d::DrawRect(CRect const &,CRGBA const &) { EAXJMP(0x51F970); }
+int &CTimer::m_snTimeInMilliseconds = *(int*)0x974B2C;
 
-WRAPPER void CFont::Initialise(void)                                 { EAXJMP(0x500A40); }
-WRAPPER void CFont::Shutdown(void)                                   { EAXJMP(0x500BA0); }
-WRAPPER void CFont::InitPerFrame(void)                               { EAXJMP(0x500BE0); }
-WRAPPER void CFont::PrintChar(float,float,short)                     { EAXJMP(0x500C30); }
-WRAPPER void CFont::PrintString(float,float,ushort *)                { EAXJMP(0x500F50); }
-WRAPPER void CFont::PrintString(float,float,ushort *,ushort *,float) { EAXJMP(0x501730); }
-WRAPPER void CFont::ParseToken(ushort *,ushort *)                    { EAXJMP(0x5019A0); }
-WRAPPER void CFont::DrawFonts(void)                                  { EAXJMP(0x501B50); }
-WRAPPER void CFont::SetScale(float,float)                            { EAXJMP(0x501B80); }
-WRAPPER void CFont::SetColor(CRGBA*)                                 { EAXJMP(0x501BD0); }
-WRAPPER void CFont::SetJustifyOff(void)                              { EAXJMP(0x501C80); }
-WRAPPER void CFont::SetCentreOn(void)                                { EAXJMP(0x501C90); }
-WRAPPER void CFont::SetCentreOff(void)                               { EAXJMP(0x501CB0); }
-WRAPPER void CFont::SetCentreSize(float)                             { EAXJMP(0x501CD0); }
-WRAPPER void CFont::SetBackgroundOff(void)                           { EAXJMP(0x501CF0); }
-WRAPPER void CFont::SetBackGroundOnlyTextOff(void)                   { EAXJMP(0x501D40); }
-WRAPPER void CFont::SetRightJustifyOn(void)                          { EAXJMP(0x501D50); }
-WRAPPER void CFont::SetPropOff(void)                                 { EAXJMP(0x501D90); }
-WRAPPER void CFont::SetPropOn(void)                                  { EAXJMP(0x501DA0); }
-WRAPPER void CFont::SetFontStyle(short)                              { EAXJMP(0x501DB0); }
-WRAPPER void CFont::SetRightJustifyWrap(float)                       { EAXJMP(0x501DC0); }
-WRAPPER void CFont::SetDropShadowPosition(short)                     { EAXJMP(0x501E70); }
-WRAPPER double CFont::GetStringWidth(ushort *str, bool spc)          { EAXJMP(0x5018A0); }
+int8  &CClock::ms_nGameClockHours = *(int8*)0xA10B6B;
+int8  &CClock::ms_nGameClockMinutes = *(int8*)0xA10B92;
+int16 &CClock::ms_nGameClockSeconds = *(int16*)0xA10A3C;
 
-WRAPPER void CMatrix::SetRotate(float x, float y, float z) { EAXJMP(0x4B93A0); }
+float &CWeather::InterpolationValue = *(float*)0x9787D8;
+int16 &CWeather::OldWeatherType = *(int16*)0xA10AAA;
+int16 &CWeather::NewWeatherType = *(int16*)0xA10A2E;
 
-WRAPPER CEntity *FindPlayerPed(void) { EAXJMP(0x4A1150); }
-WRAPPER CEntity *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
-WRAPPER void FindPlayerCoors(CVector*) { EAXJMP(0x4A1030); }
+CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x94D788;
+CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x936908;
 
-WRAPPER bool CPed::IsPedInControl(void) { EAXJMP(0x4CE6C0); }
+WRAPPER CPad *CPad::GetPad(int id) { EAXJMP(0x4AB060); }
 
-WRAPPER CAutomobile *CAutomobile::ctor(int id, uint8 type) { EAXJMP(0x52C6B0); }
+WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes key) { EAXJMP(0x617E10); }
+WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes key) { EAXJMP(0x617430); }
 
-WRAPPER void AsciiToUnicode(char const *,ushort *) { EAXJMP(0x5009C0); }
-WRAPPER void debug(const char *fmt, ...) { EAXJMP(0x405DB0); }
+WRAPPER void CWanted::CheatWantedLevel(int level) { EAXJMP(0x4D1F80); }
 
-// RW
+WRAPPER CAutomobile *CAutomobile::ctor(int id, uint8 type) { EAXJMP(0x59E620); }
 
-static uint32_t RwImageSetFromRaster_A = AddressByVersion<uint32_t>(0x5BBF10, 0, 0, 0x660270, 0, 0);
-WRAPPER RwImage *RwImageSetFromRaster(RwImage*, RwRaster*) { VARJMP(RwImageSetFromRaster_A); }
-
+#if 0
 //
 // from SkyGfx:
 //
@@ -114,8 +81,10 @@ static uint32_t RwMatrixMultiply_A = AddressByVersion<uint32_t>(0x5A28F0, 0x5A2B
 WRAPPER RwMatrix *RwMatrixMultiply(RwMatrix*, const RwMatrix*, const RwMatrix*) { VARJMP(RwMatrixMultiply_A); }
 static uint32_t RwMatrixInvert_A = AddressByVersion<uint32_t>(0x5A2C90, 0x5A2F50, 0x5A35A0, 0x643F40, 0x643F90, 0x642EF0);
 WRAPPER RwMatrix *RwMatrixInvert(RwMatrix*, const RwMatrix*) { VARJMP(RwMatrixInvert_A); }
+#endif
 static uint32_t RwMatrixUpdate_A = AddressByVersion<uint32_t>(0x5A28E0, 0x5A2BA0, 0x5A2DF0, 0x6437B0, 0x643800, 0x642760);
 WRAPPER RwMatrix *RwMatrixUpdate(RwMatrix*) { VARJMP(RwMatrixUpdate_A); }
+#if 0
 static uint32_t RwMatrixRotate_A = AddressByVersion<uint32_t>(0x5A2BF0, 0x5A2EB0, 0x5A3510, 0x643EA0, 0x643EF0, 0x642E50); //TODO
 WRAPPER RwMatrix *RwMatrixRotate(RwMatrix*, const RwV3d*, RwReal, RwOpCombineType) { VARJMP(RwMatrixRotate_A); }
 
@@ -144,8 +113,10 @@ static uint32_t RwCameraBeginUpdate_A = AddressByVersion<uint32_t>(0x5A5030, 0x5
 WRAPPER RwCamera *RwCameraBeginUpdate(RwCamera*) { VARJMP(RwCameraBeginUpdate_A); }
 static uint32_t RwCameraEndUpdate_A = AddressByVersion<uint32_t>(0x5A5020, 0x5A52E0, 0x5A7200, 0x64A810, 0x64A860, 0x6497C0);
 WRAPPER RwCamera *RwCameraEndUpdate(RwCamera*) { VARJMP(RwCameraEndUpdate_A); }
+#endif
 static uint32_t RwCameraSetNearClipPlane_A = AddressByVersion<uint32_t>(0x5A5070, 0x5A5330, 0x5A7270, 0x64A860, 0x64A8B0, 0x649810);
 WRAPPER RwCamera *RwCameraSetNearClipPlane(RwCamera*, RwReal) { VARJMP(RwCameraSetNearClipPlane_A); }
+#if 0
 static uint32_t RwCameraSetFarClipPlane_A = AddressByVersion<uint32_t>(0x5A5140, 0x5A5400, 0x5A72A0, 0x64A930, 0x64A980, 0x6498E0);
 WRAPPER RwCamera *RwCameraSetFarClipPlane(RwCamera*, RwReal) { VARJMP(RwCameraSetFarClipPlane_A); }
 static uint32_t RwCameraSetViewWindow_A = AddressByVersion<uint32_t>(0x5A52B0, 0x5A5570, 0x5A7440, 0x64AAA0, 0x64AAF0, 0x649A50);
@@ -277,3 +248,5 @@ WRAPPER void rwD3D8AtomicMatFXRenderCallback(RwResEntry*, void*, RwUInt8, RwUInt
 
 static uint32_t RpClumpForAllAtomics_A = AddressByVersion<uint32_t>(0x59EDD0, 0x59F090, 0x59EFC0, 0x640D00, 0x640D50, 0x63FCB0);
 WRAPPER RpClump *RpClumpForAllAtomics(RpClump*, RpAtomicCallBack, void*) { VARJMP(RpClumpForAllAtomics_A); }
+
+#endif

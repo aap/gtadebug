@@ -1,21 +1,26 @@
 
-struct CTimer
+// VC
+
+class CTimer
 {
-	static float &ms_fTimeScale;
+public:
+	static int &m_snTimeInMilliseconds;
 };
 
-struct CClock
+class CClock
 {
+public:
+	static int8  &ms_nGameClockHours;
+	static int8  &ms_nGameClockMinutes;
 	static int16 &ms_nGameClockSeconds;
-	static uint8 &ms_nGameClockMinutes;
-	static uint8 &ms_nGameClockHours;
 };
 
-struct CWeather
+class CWeather
 {
+public:
+	static float &InterpolationValue;
 	static int16 &OldWeatherType;
 	static int16 &NewWeatherType;
-	static float &InterpolationValue;
 };
 
 struct CDraw
@@ -23,14 +28,10 @@ struct CDraw
 	static void SetFOV(float fov);
 };
 
-struct CIplStore
-{
-	static void AddIplsNeededAtPosn(CVector *pos);
-};
 
-/*
- * Input stuff
- */
+//
+// Input stuff
+//
 
 struct CControllerState
 {
@@ -55,11 +56,8 @@ struct CControllerState
 	short LEFTSHOCK;
 	short RIGHTSHOCK;
 	short NETWORK_TALK;
-	short m_bPedWalk;
-	short m_bVehicleMouseLook;
-	short m_bRadioTrackSkip;
 };
-static_assert(sizeof(CControllerState) == 0x30, "CControllerState: wrong size");
+static_assert(sizeof(CControllerState) == 0x2A, "CControllerState: wrong size");
 
 struct CMouseControllerState
 {
@@ -70,9 +68,69 @@ struct CMouseControllerState
 	uchar wheelDown;
 	uchar bmx1;
 	uchar bmx2;
-	float Z;
 	float X;
 	float Y;
+};
+
+enum RsKeyCodes
+{
+	rsESC = 0x3E8,
+	rsF1 = 0x3E9,
+	rsF2 = 0x3EA,
+	rsF3 = 0x3EB,
+	rsF4 = 0x3EC,
+	rsF5 = 0x3ED,
+	rsF6 = 0x3EE,
+	rsF7 = 0x3EF,
+	rsF8 = 0x3F0,
+	rsF9 = 0x3F1,
+	rsF10 = 0x3F2,
+	rsF11 = 0x3F3,
+	rsF12 = 0x3F4,
+	rsINSERT = 0x3F5,
+	rsDEL = 0x3F6,
+	rsHOME = 0x3F7,
+	rsEND = 0x3F8,
+	rsPGUP = 0x3F9,
+	rsPGDN = 0x3FA,
+	rsUP = 0x3FB,
+	rsDOWN = 0x3FC,
+	rsLEFT = 0x3FD,
+	rsRIGHT = 0x3FE,
+	rsDIV = 0x3FF,
+	rsMUL = 0x400,
+	rsADD = 0x401,
+	rsSUB = 0x402,
+	rsEXTDEL = 0x403,
+	rsEXT_END = 0x404,
+	rsEXTDOWN = 0x405,
+	rsEXTPGDN = 0x406,
+	rsEXTLEFT = 0x407,
+	rsNUM5 = 0x408,
+	rsNUMLOCK = 0x409,
+	rsEXTRIGHT = 0x40A,
+	rsEXTHOME = 0x40B,
+	rsEXTUP = 0x40C,
+	rsEXTPGUP = 0x40D,
+	rsEXTINSERT = 0x40E,
+	rsENTER = 0x40F,
+	rsSCROLL = 0x410,
+	rsPAUSE = 0x411,
+	rsBACK = 0x412,
+	rsTAB = 0x413,
+	rsCAPSLOCK = 0x414,
+	rsEXTENTER = 0x415,
+	rsLSHIFT = 0x416,
+	rsRSHIFT = 0x417,
+	rsSHIFT = 0x418,
+	rsLCTRL = 0x419,
+	rsRCTRL = 0x41A,
+	rsLMENU = 0x41B,
+	rsRMENU = 0x41C,
+	rsLWIN = 0x41D,
+	rsRWIN = 0x41E,
+	rsAPPS = 0x41F,
+	rsNULL = 0x420,
 };
 
 class CPad
@@ -80,8 +138,8 @@ class CPad
 public:
 	CControllerState	NewState;
 	CControllerState	OldState;
-	WORD			SteeringLeftRightBuffer[10];
-	DWORD			DrunkDrivingBufferUsed;
+	short			SteeringLeftRightBuffer[10];
+	int				DrunkDrivingBufferUsed;
 	CControllerState	PCTempKeyState;
 	CControllerState	PCTempJoyState;
 	CControllerState	PCTempMouseState;
@@ -90,29 +148,21 @@ public:
 	short			ShakeDur;
 	WORD			DisablePlayerControls;
 	BYTE			ShakeFreq;
-	BYTE			bHornHistory[5];
+	bool			bHornHistory[5];
 	BYTE			iCurrHornHistory;
 	bool			JustOutOfFrontEnd;
 	bool			bApplyBrakes;
-	bool			bDisablePlayerEnterCar;
-	bool			bDisablePlayerDuck;
-	bool			bDisablePlayerFireWeapon;
-	bool			bDisablePlayerFireWeaponWithL1;
-	bool			bDisablePlayerCycleWeapon;
-	bool			bDisablePlayerJump;
-	bool			bDisablePlayerDisplayVitalStats;
+	BYTE			_pad1[12];
 	int			LastTimeTouched;
 	DWORD			AverageWeapon;
 	DWORD			AverageEntries;
-	DWORD			NoShakeBeforeThis;
-	BYTE			NoShakeFreq;
 
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &OldMouseControllerState;
 
 	static CPad *GetPad(int);
 };
-static_assert(sizeof(CPad) == 0x134, "CPad: wrong size");
+static_assert(sizeof(CPad) == 0x114, "CPad: wrong size");
 
 class CControllerConfigManager
 {
@@ -131,41 +181,73 @@ public:
 
 extern CControllerConfigManager *ctrldummy;
 
-
-
-
-
-
-
-
-struct CSimpleTransform
+struct CStreamingInfo
 {
-	CVector pos;
-	float angle;
+	CStreamingInfo *next;
+	CStreamingInfo *prev;
+	uint8 loadState;
+	uint8 flags;
+	int16 nextID;
+	int position;
+	int size;
+};
+static_assert(sizeof(CStreamingInfo) == 0x14, "CStreamingInfo: size error");
+
+struct PathNode
+{
+	int16 wPathData1;
+	int16 wPathData2;
+	int16 x;
+	int16 y;
+	int16 z;
+	char __f000A[10];
+};
+static_assert(sizeof(PathNode) == 0x14, "PathNode: size error");
+
+struct CPathFind {
+	PathNode nodes[9650];
+
+	int FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10, char a11, char a12);
+};
+extern CPathFind &ThePaths;
+
+struct CWanted
+{
+	void CheatWantedLevel(int level);
 };
 
 struct CPlaceable
 {
-	void *vtable;
-	CSimpleTransform placement;
-	CMatrix *m_pCoords;
+	CMatrix matrix;
 	CVector GetPosition(void){
-		if(m_pCoords)
-			return *(CVector*)&m_pCoords->matrix.pos;
-		else
-			return placement.pos;
+		return *(CVector*)&matrix.matrix.pos;
 	}
 	void SetPosition(CVector &pos){
-		if(m_pCoords)
-			*(CVector*)&m_pCoords->matrix.pos = pos;
-		else
-			placement.pos = pos;
+		*(CVector*)&matrix.matrix.pos = pos;
 	}
 };
+static_assert(sizeof(CPlaceable) == 0x48, "CPlaceable: size error");
 
-struct CEntity : public CPlaceable
+struct CEntity
 {
+	void *vtable;
+	CPlaceable _;
+	RpClump *pClump;
+	char bfTypeStatus;
+	char bfFlagsA;
+	char bfFlagsB;
+	char bfFlagsC;
+	char bfFlagsD;
+	char bfFlagsE;
+	char gap_56[2];
+	__int16 field_58;
+	__int16 unk_randomSeed;
+	int16 nModelIndex;
+	char byteLevel;
+	char byteInterior;
+	int pFirstRef;
 };
+static_assert(sizeof(CEntity) == 0x64, "CEntity: size error");
 
 struct CPhysical : public CEntity
 {
@@ -177,6 +259,7 @@ struct CVehicle : public CPhysical
 
 struct CAutomobile : public CVehicle
 {
+	CAutomobile *ctor(int id, uint8 type);
 };
 
 struct CPed : public CPhysical
@@ -187,40 +270,36 @@ struct CPlayerPed : public CPed
 {
 	static void (__thiscall *ProcessControl)(CPlayerPed*);
 	void ProcessControl_hooked(void);
-	void SetWantedLevel(int n);
 };
 
-struct CEntity_VTBL
+struct CEntityVtbl
 {
-	int (__thiscall *__dtor)(int, int);
-	int Add_CRect;
-	int Add;
-	int Remove;
-	void (__thiscall *SetIsStatic)(CEntity *, bool);
-	void (__thiscall *SetModelIndex)(CPed *, DWORD);
-	void (*SetModelIndexNoCreate)(void);
-	int (__thiscall *CreateRwObject)(CEntity *);
-	void (__thiscall *DeleteRwObject)(CEntity *);
-	void (__thiscall *GetBoundRect)(CEntity *);
-	int ProcessControl;
-	int ProcessCollision;
-	int ProcessShift;
-	int TestCollision;
-	void (__thiscall *Teleport)(CEntity *, float x, float y, float z, bool resetOrientation);
-	int SpecialEntityPreCollisionStuff;
-	int SpecialEntityCalcCollisionSteps;
-	int PreRender;
-	int Render;
-	int SetupLighting;
-	int RemoveLighting;
-	int FlagToDestroyWhenNextProcessed;
+	unsigned int (__thiscall *Add)(CEntity *self);
+	unsigned int (__thiscall *Remove)(CEntity *self);
+	void *(__thiscall *__vecDelDtor)(CEntity *self, unsigned int);
+	unsigned int (__thiscall *SetModelIndex)(CEntity *self, unsigned int);
+	unsigned int (__thiscall *SetModelIndexNoCreate)(CEntity *self, unsigned int);
+	unsigned int (__thiscall *CreateRwObject)(CEntity *self);
+	unsigned int (__thiscall *DeleteRwObject)(CEntity *self);
+	CRect *(__thiscall *GetBoundRect)(CEntity *self, CRect *result);
+	void (__thiscall *ProcessControl)(CEntity *self);
+	unsigned int (__thiscall *ProcessCollision)(CEntity *self);
+	unsigned int (__thiscall *ProcessShift)(CEntity *self);
+	void (__thiscall *Teleport)(CEntity *self, CVector);
+	void (__thiscall *PreRender)(CEntity *self);
+	void (__thiscall *Render)(CEntity *self);
+	unsigned int (__thiscall *SetupLighting)(CEntity *self);
+	unsigned int (__thiscall *RemoveLighting)(CEntity *self, bool);
+	void (__thiscall *FlagToDestroyWhenNextProcessed)(CEntity *self);
 };
 
+struct CGarage;
 
+//
+// Camera
+//
 
-
-#define NUMBER_OF_VECTORS_FOR_AVERAGE	2
-#define CAM_NUM_TARGET_HISTORY          4
+#define NUMBER_OF_VECTORS_FOR_AVERAGE 2
 
 struct CCam
 {
@@ -239,14 +318,14 @@ struct CCam
 
 	int16   Mode;                   // CameraMode
 	uint32  m_uiFinishTime; // 52
-    
+
 	int     m_iDoCollisionChecksOnFrameNum; 
 	int     m_iDoCollisionCheckEveryNumOfFrames;
 	int     m_iFrameNumWereAt;  // 64
 	int     m_iRunningVectorArrayPos;
 	int     m_iRunningVectorCounter;
 	int     DirectionWasLooking;
-    
+
 	float   f_max_role_angle; //=DEGTORAD(5.0f);    
 	float   f_Roll; //used for adding a slight roll to the camera in the
 	float   f_rollSpeed; //camera on a string mode
@@ -292,8 +371,7 @@ struct CCam
 	float   CA_MIN_DISTANCE;
 	float   CA_MAX_DISTANCE;
 	float   SpeedVar;
-	float   m_fCameraHeightMultiplier; //used by TwoPlayer_Separate_Cars_TopDown
-    
+
 	// ped onfoot zoom distance
 	float m_fTargetZoomGroundOne;
 	float m_fTargetZoomGroundTwo; // 256
@@ -301,26 +379,11 @@ struct CCam
 	// ped onfoot alpha angle offset
 	float m_fTargetZoomOneZExtra;
 	float m_fTargetZoomTwoZExtra;
-	float m_fTargetZoomTwoInteriorZExtra; //extra one for interior
 	float m_fTargetZoomThreeZExtra;
     
 	float m_fTargetZoomZCloseIn;
 	float m_fMinRealGroundDist;
 	float m_fTargetCloseInDist;
-
-	// For targetting in cooperative mode.
-	float   Beta_Targeting; // 292
-	float   X_Targetting, Y_Targetting;
-	int CarWeAreFocussingOn; //which car is closer to the camera in 2 player cooperative mode with separate cars.
-	float   CarWeAreFocussingOnI; //interpolated version
-    
-	float m_fCamBumpedHorz; // 312
-	float m_fCamBumpedVert;
-	int m_nCamBumpedTime; // 320
-	static int CAM_BUMPED_SWING_PERIOD;
-	static int CAM_BUMPED_END_TIME;
-	static float CAM_BUMPED_DAMP_RATE;
-	static float CAM_BUMPED_MOVE_MULT;
 
 	CVector m_cvecSourceSpeedOverOneFrame; // 324
 	CVector m_cvecTargetSpeedOverOneFrame; // 336
@@ -340,32 +403,21 @@ struct CCam
 	CVector SourceBeforeLookBehind;
 	CVector Up;                                                     // Just that
 	CVector m_arrPreviousVectors[NUMBER_OF_VECTORS_FOR_AVERAGE];    // used to average stuff
-
-	CVector m_aTargetHistoryPos[CAM_NUM_TARGET_HISTORY];
-	DWORD m_nTargetHistoryTime[CAM_NUM_TARGET_HISTORY];
-	DWORD m_nCurrentHistoryPoints;
-
 	CEntity *CamTargetEntity;
 
 	float       m_fCameraDistance;
 	float       m_fIdealAlpha;
 	float       m_fPlayerVelocity;
-	//CVector TempRight;
 	CAutomobile  *m_pLastCarEntered; // So interpolation works
 	CPed         *m_pLastPedLookedAt;// So interpolation works 
 	bool        m_bFirstPersonRunAboutActive;
-
 
 	void Process(void);
 	void Process_Debug(float*, float, float, float);
 	void GetVectorsReadyForRW(void);
 };
-static_assert(sizeof(CCam) == 0x238, "CCam: size error");
+static_assert(sizeof(CCam) == 0x1CC, "CCam: size error");
 
-struct CGarage;
-struct Surface;
-
-#define NUMBER_OF_VECTORS_FOR_AVERAGE 2
 #define MAX_NUM_OF_SPLINETYPES (4)
 
 struct CQueuedMode
@@ -382,7 +434,7 @@ struct CCamPathSplines
 	float *m_arr_PathData;//    FLOAT m_arr_PathData[MAXPATHLENGTH];    
 };
 
-struct CCamera : public CPlaceable
+struct CCamera : CPlaceable
 {
 	bool    m_bAboveGroundTrainNodesLoaded;
 	bool    m_bBelowGroundTrainNodesLoaded;
@@ -426,45 +478,11 @@ struct CCamera : public CPlaceable
 	bool    m_bHeadBob;
 	bool    m_bVehicleSuspenHigh;
 	bool    m_bEnable1rstPersonCamCntrlsScript; 
+
 	bool    m_bAllow1rstPersonWeaponsCamera;
-	bool    m_bCooperativeCamMode;
-	bool    m_bAllowShootingWith2PlayersInCar;
-	bool    m_bDisableFirstPersonInCar;
-	static bool m_bUseMouse3rdPerson;
-#if 0
-//#ifndef FINALBUILD
-	bool    bStaticFrustum;
-#endif  
-
-    // for debug keyboard stuff
-#if 0
-//#ifndef MASTER
-	    unsigned char display_kbd_debug;
-	    float kbd_fov_value;
-#endif // MASTER
-
-        // The following fields allow the level designers to specify the camera for 2 player games.
-	int16   m_ModeForTwoPlayersSeparateCars;
-	int16   m_ModeForTwoPlayersSameCarShootingAllowed;
-	int16   m_ModeForTwoPlayersSameCarShootingNotAllowed;
-	int16   m_ModeForTwoPlayersNotBothInCar;
-
-	bool    m_bGarageFixedCamPositionSet;
-	bool    m_vecDoingSpecialInterPolation;
-	bool    m_bScriptParametersSetForInterPol;
-
-    
-	bool    m_bFading;//to indicate that we are fading 
-	bool    m_bMusicFading;
-	bool    m_bMusicFadedOut;
-
 	bool    m_bFailedCullZoneTestPreviously;
 	bool    m_FadeTargetIsSplashScreen;//used as hack for fading 
 	bool    WorldViewerBeingUsed; // To indicate if the world viewer is being used.                                      
-
-    
-	uint8   m_uiTransitionJUSTStarted;  // This is the first frame of a transition.
-	uint8   m_uiTransitionState;        // 0:one mode 1:transition
 	uint8   ActiveCam;              // Which one at the moment (0 or 1)
                                         // Their is a fudge at the end when the renderware matrix will receive either
                                         // the active camera or the worldviewer camera
@@ -472,6 +490,9 @@ struct CCamera : public CPlaceable
 	uint32    m_uiFirstPersonCamLastInputTime;
 	uint32    m_uiLongestTimeInMill;
 	uint32    m_uiNumberOfTrainCamNodes;
+
+	uint8     m_uiTransitionJUSTStarted;  // This is the first frame of a transition.
+	uint8     m_uiTransitionState;        // 0:one mode 1:transition
 	uint32    m_uiTimeLastChange;
 	uint32    m_uiTimeWeLeftIdle_StillNoInput;
 	uint32    m_uiTimeWeEnteredIdle;
@@ -491,31 +512,11 @@ struct CCamera : public CPlaceable
 	int     m_iCheckCullZoneThisNumFrames; 
 	int     m_iZoneCullFrameNumWereAt;
 	int     WhoIsInControlOfTheCamera; //to discern between obbe and scripts
-
-
-//	float   CarZoomIndicator;
-//	float   CarZoomValue;
-//	float   CarZoomValueSmooth;
-//	float   m_fCarZoomValueScript;
-//	float   PedZoomIndicator;
-//	float   m_fPedZoomValue;
-//	float   m_fPedZoomValueSmooth;
-//	float   m_fPedZoomValueScript;
-	int     m_nCarZoom;                 // store zoom index
-	float   m_fCarZoomBase;             // store base zoom distance from index
-	float   m_fCarZoomTotal;            // store total zoom after modded by camera modes
-	float   m_fCarZoomSmoothed;         // buffered version of the var above
-	float   m_fCarZoomValueScript;
-	int     m_nPedZoom;                 // store zoom index
-	float   m_fPedZoomBase;             // store base zoom distance from index
-	float   m_fPedZoomTotal;            // store total zoom after modded by camera modes
-	float   m_fPedZoomSmoothed;         // buffered version of the var above
-	float   m_fPedZoomValueScript;
-
-
 	float   CamFrontXNorm, CamFrontYNorm;
+	float   CarZoomIndicator;
+	float   CarZoomValue;
+	float   CarZoomValueSmooth;
 	float   DistanceToWater;
-	float   HeightOfNearestWater;
 	float   FOVDuringInter;
 	float   LODDistMultiplier;  // This takes into account the FOV and the standard LOD multiplier Smaller aperture->bigger LOD multipliers.
 	float   GenerationDistMultiplier;   // This takes into account the FOV but noy the standard LOD multiplier
@@ -535,17 +536,20 @@ struct CCamera : public CPlaceable
 	float   m_CameraAverageSpeed; //this is an average depending on how many frames we work it out
 	float   m_CameraSpeedSoFar; //this is a running total
 	float   m_fCamShakeForce;           // How severe is the camera shake.
+/**/	float m_fCarZoomValueScript;
 	float   m_fFovForTrain;
 	float   m_fFOV_Wide_Screen;
-
 	float   m_fNearClipScript;
 	float   m_fOldBetaDiff;         // Needed for interpolation between 2 modes
+	float   m_fPedZoomValue;
+	float   m_fPedZoomValueSmooth;
+	float   m_fPedZoomValueScript;
 	float   m_fPositionAlongSpline;//Variable used to indicate how far along the spline we are 0-1 for started to completed respectively
 	float   m_ScreenReductionPercentage;
 	float   m_ScreenReductionSpeed;
 	float   m_AlphaForPlayerAnim1rstPerson;
-    
 	float   Orientation;            // The orientation of the camera. Used for peds walking.
+	float   PedZoomIndicator;
 	float   PlayerExhaustion;       // How tired is player (inaccurate sniping) 0.0f-1.0f
                     // The following things are used by the sound code to
                     // play reverb depending on the surroundings. From a point
@@ -557,31 +561,22 @@ struct CCamera : public CPlaceable
                     // Very rough distance to the nearest water for the sound to use
                     // Front vector X&Y normalised to 1. Used by loads of stuff.
 
-    
+
 	float   m_fAvoidTheGeometryProbsTimer;
 	int16   m_nAvoidTheGeometryProbsDirn;
-    
+ 
 	float   m_fWideScreenReductionAmount;//0 for not reduced 1 for fully reduced (Variable for Les)
 	float   m_fStartingFOVForInterPol;
-    
-        // These ones are static so that they don't get cleared in CCamera::Init()
-	static  float m_fMouseAccelHorzntl;// acceleration multiplier for 1st person controls
-	static  float m_fMouseAccelVertical;// acceleration multiplier for 1st person controls
-	static  float m_f3rdPersonCHairMultX;
-	static  float m_f3rdPersonCHairMultY;
-
+ 
 	CCam Cams[3];                // The actual cameras (usually only one of the two is active)
                             // And to complicate this we have a third camera, this camera is 
                             // used for debugging when we want to have a look at the world.
                             // We can't change the camera mode because other objects depend on their
 
-	// #########################################//
-	// DATA NOT UPDATED FOR SA  BELOW HERE!!!!! //
-	// #########################################//
-
 	CGarage *pToGarageWeAreIn;
 	CGarage *pToGarageWeAreInForHackAvoidFirstPerson;
 	CQueuedMode m_PlayerMode;
+
 	// The higher priority player camera mode. This one is used
 	// for the sniper mode and rocket launcher mode.
 	// This one overwrites the m_PlayerMode above.
@@ -597,6 +592,7 @@ struct CCamera : public CPlaceable
 	CVector m_vecFixedModeSource;
 	CVector m_vecFixedModeUpOffSet;
 	CVector m_vecCutSceneOffset;
+
 	CVector m_cvecStartingSourceForInterPol;
 	CVector m_cvecStartingTargetForInterPol;
 	CVector m_cvecStartingUpForInterPol;
@@ -608,44 +604,21 @@ struct CCamera : public CPlaceable
 	CVector m_vecUpWhenInterPol;
 	CVector m_vecClearGeometryVec;
 	CVector m_vecGameCamPos;
+
 	CVector SourceDuringInter, TargetDuringInter, UpDuringInter;
-
-
-	CVector m_vecAttachedCamOffset; // for attaching the camera to a ped or vehicle (set by level designers for use in cutscenes)
-	CVector m_vecAttachedCamLookAt; 
-	float m_fAttachedCamAngle; // for giving the attached camera a tilt.
-
 	// RenderWare camera pointer
 	RwCamera* m_pRwCamera; // was RwCamera *
 	///stuff for cut scenes
 	CEntity *pTargetEntity;
-	CEntity *pAttachedEntity;
-	//CVector CutScene; 
 	CCamPathSplines m_arrPathArray[MAX_NUM_OF_SPLINETYPES]; //These only get created when the script calls the load splines function
-	// maybe this shouldn't be here depends if GTA_TRAIN is defined (its not)
-	//CTrainCamNode     m_arrTrainCamNode[MAX_NUM_OF_NODES];
-
-	bool m_bMirrorActive;
-	bool m_bResetOldMatrix;
-
 	CMatrix m_cameraMatrix;
-	CMatrix m_cameraMatrixOld;
+	bool    m_bGarageFixedCamPositionSet;
+	bool    m_vecDoingSpecialInterPolation;
+	bool    m_bScriptParametersSetForInterPol;
+	bool    m_bFading;//to indicate that we are fading 
+	bool    m_bMusicFading;
 	CMatrix m_viewMatrix;
-	CMatrix m_matInverse;
-	CMatrix m_matMirrorInverse;
-	CMatrix m_matMirror;
-
 	CVector m_vecFrustumNormals[4];
-	CVector m_vecFrustumWorldNormals[4];
-	CVector m_vecFrustumWorldNormals_Mirror[4];
-
-	float m_fFrustumPlaneOffsets[4];
-	float m_fFrustumPlaneOffsets_Mirror[4];
-
-	CVector m_vecRightFrustumNormal;
-	CVector m_vecBottomFrustumNormal;
-	CVector m_vecTopFrustumNormal;
-
 	CVector m_vecOldSourceForInter;
 	CVector m_vecOldFrontForInter;
 	CVector m_vecOldUpForInter;
@@ -654,7 +627,6 @@ struct CCamera : public CPlaceable
 	float   m_fFLOATingFadeMusic;
 	float   m_fTimeToFadeOut;
 	float   m_fTimeToFadeMusic;
-	float   m_fTimeToWaitToFadeMusic;
 	float   m_fFractionInterToStopMoving; 
 	float   m_fFractionInterToStopCatchUp;
 	float   m_fFractionInterToStopMovingTarget; 
@@ -665,20 +637,29 @@ struct CCamera : public CPlaceable
 	float   m_fScriptPercentageInterToCatchUp;
 	uint32  m_fScriptTimeForInterPolation;
 
-
 	int16   m_iFadingDirection;
 	int     m_iModeObbeCamIsInForCar;
 	int16   m_iModeToGoTo;
 	int16   m_iMusicFadingDirection;
 	int16   m_iTypeOfSwitch;
 
-	DWORD   m_uiFadeTimeStarted;
-	DWORD   m_uiFadeTimeStartedMusic;
+	uint32  m_uiFadeTimeStarted;
+	uint32  m_uiFadeTimeStartedMusic;
 
 	void InitialiseCameraForDebugMode(void);
-	void CopyCameraMatrixToRWCam(bool);
 };
-static_assert(offsetof(CCamera, pToGarageWeAreIn) == 0x81C, "CCamera: error");
+static_assert(sizeof(CCamera) == 0x958, "CCamera: size error");
+extern CCamera &TheCamera;
 
-CVehicle *FindPlayerVehicle(int, bool);
-CPlayerPed *FindPlayerPed(int);
+CVehicle *FindPlayerVehicle(void);
+CPlayerPed *FindPlayerPed(void);
+void FindPlayerCoors(CVector*);
+
+extern CStreamingInfo *CStreaming__ms_aInfoForModel;
+void CStreaming__RequestModel(int id, int flags);
+void CStreaming__LoadAllRequestedModels(bool b);
+void CStreaming__SetModelIsDeletable(int id);
+void CStreaming__SetModelTxdIsDeletable(int id);
+
+CVehicle *CVehicle__new(int size);
+void CWorld__Add(CEntity *e);

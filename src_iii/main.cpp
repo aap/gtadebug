@@ -14,6 +14,15 @@ WRAPPER void CStreaming__SetModelIsDeletable(int id) { EAXJMP(0x40A790); }
 WRAPPER CVehicle *CVehicle__new(int size) { EAXJMP(0x551120); }
 WRAPPER void CWorld__Add(CEntity *e) { EAXJMP(0x4AE930); }
 
+int drawLODs = 1;
+bool (*CRenderer__SetupBigBuildingVisibility_orig)(CEntity *e);
+bool CRenderer__SetupBigBuildingVisibility(CEntity *e)
+{
+	if(drawLODs)
+		return CRenderer__SetupBigBuildingVisibility_orig(e);
+	return false;
+}
+
 
 enum ModelIDs {
 	MODELID_STINGER = 92,
@@ -157,7 +166,7 @@ delayedPatches10(int a, int b)
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy"
 		};
-		MenuEntry *e;
+		DebugMenuEntry *e;
 		e = DebugMenuAddVar("Time & Weather", "Current Hour", (uint8*)&CClock::ms_nGameClockHours, nil, 1, 0, 23, nil);
 		DebugMenuEntrySetWrap(e, true);
 		e = DebugMenuAddVar("Time & Weather", "Current Minute", (uint8*)&CClock::ms_nGameClockMinutes,
@@ -193,10 +202,13 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Cheats", "Strong grip", [](){ ((void (*)(void))0x491670)(); });
 		DebugMenuAddCmd("Cheats", "Nasty limbs", [](){ ((void (*)(void))0x4916A0)(); });
 
-		DebugMenuAddVarBool32("Misc", "Invincible", &isPlayerInvincible, nil);
+		DebugMenuAddVarBool32("Player", "Invincible", &isPlayerInvincible, nil);
+
+		DebugMenuAddVarBool32("Misc", "Draw LODs", &drawLODs, nil);
+		InterceptCall(&CRenderer__SetupBigBuildingVisibility_orig, CRenderer__SetupBigBuildingVisibility, 0x4A931D);
 
 		static int playerId = 0;
-		e = DebugMenuAddVar("Misc", "Player model", &playerId, [](){
+		e = DebugMenuAddVar("Player", "Player model", &playerId, [](){
 				if(playerId >= 26 && playerId <= 29 || playerId == 8)
 					return;
 				changePlayerModel(playerId);
@@ -204,9 +216,9 @@ delayedPatches10(int a, int b)
 		DebugMenuEntrySetWrap(e, true);
 
 		static int spawnCarId = 90;
-		e = DebugMenuAddVar("Misc", "Spawn Car ID", &spawnCarId, nil, 1, 90, 150, carnames);
+		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, 90, 150, carnames);
 		DebugMenuEntrySetWrap(e, true);
-		DebugMenuAddCmd("Misc", "Spawn Car", [](){
+		DebugMenuAddCmd("Spawn", "Spawn Car", [](){
 			if(spawnCarId == MODELID_TRAIN ||
 			   spawnCarId == MODELID_CHOPPER ||
 			   spawnCarId == MODELID_AIRTRAIN ||
@@ -220,14 +232,14 @@ delayedPatches10(int a, int b)
 				return;
 			spawnCar(spawnCarId);
 		});
-		DebugMenuAddCmd("Misc", "Spawn Stinger", [](){ spawnCar(MODELID_STINGER); });
-		DebugMenuAddCmd("Misc", "Spawn Internus", [](){ spawnCar(MODELID_INFERNUS); });
-		DebugMenuAddCmd("Misc", "Spawn Cheetah", [](){ spawnCar(MODELID_CHEETAH); });
-		DebugMenuAddCmd("Misc", "Spawn Taxi", [](){ spawnCar(MODELID_TAXI); });
-		DebugMenuAddCmd("Misc", "Spawn Police", [](){ spawnCar(MODELID_POLICE); });
-		DebugMenuAddCmd("Misc", "Spawn Banshee", [](){ spawnCar(MODELID_BANSHEE); });
-		DebugMenuAddCmd("Misc", "Spawn Yakuza", [](){ spawnCar(MODELID_YAKUZA); });
-		DebugMenuAddCmd("Misc", "Spawn Dodo", [](){ spawnCar(MODELID_DODO); });
+		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ spawnCar(MODELID_STINGER); });
+		DebugMenuAddCmd("Spawn", "Spawn Internus", [](){ spawnCar(MODELID_INFERNUS); });
+		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ spawnCar(MODELID_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ spawnCar(MODELID_TAXI); });
+		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ spawnCar(MODELID_POLICE); });
+		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ spawnCar(MODELID_BANSHEE); });
+		DebugMenuAddCmd("Spawn", "Spawn Yakuza", [](){ spawnCar(MODELID_YAKUZA); });
+		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ spawnCar(MODELID_DODO); });
 
 		installColDebug();
 

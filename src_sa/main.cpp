@@ -254,6 +254,10 @@ delayedPatches(void)
 		DebugMenuAddVarBool8("PostFX", "TakePhoto", (int8_t*)0xC8A7C1, nil);
 	}
 	patchDebugCam();
+
+	void privatehooks(void);
+	privatehooks();
+
 	return 0;
 }
 

@@ -71,7 +71,7 @@ WRAPPER double CFont::GetStringWidth(ushort *str, bool spc)          { EAXJMP(0x
 WRAPPER void CMatrix::SetRotate(float x, float y, float z) { EAXJMP(0x4B93A0); }
 
 WRAPPER CEntity *FindPlayerPed(void) { EAXJMP(0x4A1150); }
-WRAPPER CEntity *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
+WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
 WRAPPER void FindPlayerCoors(CVector*) { EAXJMP(0x4A1030); }
 
 WRAPPER bool CPed::IsPedInControl(void) { EAXJMP(0x4CE6C0); }

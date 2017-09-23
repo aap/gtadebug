@@ -1,5 +1,7 @@
 #include "debug.h"
 
+// III
+
 DebugMenuAPI gDebugMenuAPI;
 
 HMODULE dllModule;
@@ -28,6 +30,7 @@ enum ModelIDs {
 	MODELID_STINGER = 92,
 	MODELID_INFERNUS = 101,
 	MODELID_CHEETAH = 105,
+	MODELID_ESPERANTO = 109,
 	MODELID_TAXI = 110,
 	MODELID_POLICE = 116,
 	MODELID_BANSHEE = 119,
@@ -108,6 +111,9 @@ changePlayerModel(int id)
 	}
 }
 
+DebugMenuEntry *carCol1;
+DebugMenuEntry *carCol2;
+
 void
 spawnCar(int id)
 {
@@ -120,6 +126,11 @@ spawnCar(int id)
 		if(node >= 0){
 			CAutomobile *v = (CAutomobile*)CVehicle__new(0x5A8);
 			v = v->ctor(id, 2);
+
+			DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, v, 0x19C));
+			DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, v, 0x19D));
+			//if(id == MODELID_ESPERANTO)
+			//	FIELD(uchar, v, 0x19C) = 54;
 
 			v->matrix.matrix.pos.x = ThePaths.nodes[node].x;
 			v->matrix.matrix.pos.y = ThePaths.nodes[node].y;
@@ -232,9 +243,13 @@ delayedPatches10(int a, int b)
 				return;
 			spawnCar(spawnCarId);
 		});
+		static uchar dummy;
+		carCol1 = DebugMenuAddVar("Spawn", "First colour", &dummy, nil, 1, 0, 255, nil);
+		carCol2 = DebugMenuAddVar("Spawn", "Second colour", &dummy, nil, 1, 0, 255, nil);
 		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ spawnCar(MODELID_STINGER); });
 		DebugMenuAddCmd("Spawn", "Spawn Internus", [](){ spawnCar(MODELID_INFERNUS); });
 		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ spawnCar(MODELID_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ spawnCar(MODELID_ESPERANTO); });
 		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ spawnCar(MODELID_TAXI); });
 		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ spawnCar(MODELID_POLICE); });
 		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ spawnCar(MODELID_BANSHEE); });
@@ -245,6 +260,9 @@ delayedPatches10(int a, int b)
 
 		InjectHook(0x4F0758, PlayerPedInvincible, PATCH_JUMP);
 	}
+	//void privatehooks(void);
+	//privatehooks();
+
 	return RsEventHandler_orig(a, b);
 }
 

@@ -1,3 +1,4 @@
+// III
 
 struct CColSphere
 {
@@ -232,17 +233,99 @@ struct CPhysical : CEntity
 };
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: wrong size");
 
-struct CPed : CEntity
+struct CPed : CPhysical
 {
 	int pad;
 
 	bool IsPedInControl(void);
 };
 
-struct CVehicle : CEntity
+struct tHandlingData;
+
+struct CVehicle : CPhysical
 {
-	int pad;
+  tHandlingData *handling;
+  DWORD dword12C;
+  DWORD dword130;
+  DWORD dword134;
+  DWORD dword138;
+  DWORD dword13C;
+  DWORD dword140;
+  DWORD dword144;
+  DWORD dword148;
+  DWORD dword14C;
+  DWORD dword150;
+  BYTE f154[1];
+  BYTE byte155;
+  BYTE byte156;
+  BYTE byte157;
+  BYTE byte158;
+  BYTE byte159;
+  BYTE byte15A;
+  BYTE m_bAnimationId;
+  DWORD m_dwAnimationTime;
+  DWORD dword160;
+  BYTE byte164;
+  BYTE byte165;
+  BYTE f166[46];
+  WORD word194;
+  BYTE f196[2];
+  DWORD dword198;
+  char m_bCarColorId[2];
+  char m_bExtra[2];
+  WORD word1A0;
+  BYTE f1A2[2];
+  DWORD m_pDriver;
+  int m_pPassenger[8];
+  BYTE m_bNumPassengers;
+  BYTE byte1C9;
+  BYTE byte1CA;
+  BYTE byte1CB;
+  BYTE maxNumPassengers;
+  BYTE f1CD[19];
+  CEntity *m_pRoad;
+  DWORD m_pCarFire;
+  float m_fWheelAngle;
+  float m_fGasPedal;
+  float m_fBreakPedal;
+  BYTE byte1F4;
+  BYTE field_1F5;
+  BYTE byte1F6;
+  BYTE byte1F7;
+  BYTE byte1F8;
+  BYTE byte1F9;
+  BYTE f1FA[1];
+  BYTE byte1FB;
+  BYTE f1FC[4];
+  DWORD m_fHealth;
+  BYTE byte204;
+  BYTE f205[3];
+  DWORD dword208;
+  DWORD dword20C;
+  DWORD dword210;
+  WORD word214;
+  WORD word216;
+  DWORD dword218;
+  float float21C;
+  float float220;
+  DWORD dword224;
+  BYTE byte228;
+  BYTE byte229;
+  BYTE byte22A;
+  BYTE byte22B;
+  BYTE m_bCarHornTimer;
+  BYTE byte22D;
+  BYTE m_bSirenOrAlarm;
+  BYTE byte22F;
+  BYTE f230[36];
+  BYTE byte254;
+  BYTE f255[39];
+  BYTE byte27C;
+  BYTE f27D[3];
+  DWORD m_fSteering;
+  int m_dwVehicleSubType;
 };
+static_assert(sizeof(CVehicle) == 0x288, "CVehicle: wrong size");
 
 struct CAutomobile : CVehicle
 {
@@ -441,10 +524,11 @@ bool m_FadeTargetIsSplashScreen;
 	bool WorldViewerBeingUsed;
 	uint8 ActiveCam;
 	uint32 m_uiCamShakeStart;
-
-bool m_bVehicleSuspenHigh;
-bool m_bEnable1rstPersonCamCntrlsScript;
-bool m_bAllow1rstPersonWeaponsCamera;
+	uint32 m_uiFirstPersonCamLastInputTime;
+// where are those?
+//bool m_bVehicleSuspenHigh;
+//bool m_bEnable1rstPersonCamCntrlsScript;
+//bool m_bAllow1rstPersonWeaponsCamera;
 
 	uint32 m_uiLongestTimeInMill;
 	uint32 m_uiNumberOfTrainCamNodes;
@@ -471,11 +555,13 @@ uint32    unknown;
 	int m_iCheckCullZoneThisNumFrames;
 	int m_iZoneCullFrameNumWereAt;
 	int WhoIsInControlOfTheCamera;
+
 	float CamFrontXNorm;
 	float CamFrontYNorm;
 	float CarZoomIndicator;
 	float CarZoomValue;
 	float CarZoomValueSmooth;
+
 	float DistanceToWater;
 	float FOVDuringInter;
 	float LODDistMultiplier;
@@ -797,5 +883,5 @@ struct CHud
 };
 
 CEntity *FindPlayerPed(void);
-CEntity *FindPlayerVehicle(void);
+CVehicle *FindPlayerVehicle(void);
 void FindPlayerCoors(CVector*);

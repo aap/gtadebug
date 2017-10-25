@@ -1,6 +1,14 @@
 
 // VC
 
+class CModelInfo {
+public:
+
+    static bool IsBikeModel(int index);
+    static bool IsBoatModel(int index);
+
+};
+
 class CTimer
 {
 public:
@@ -261,6 +269,19 @@ struct CAutomobile : public CVehicle
 {
 	CAutomobile *ctor(int id, uint8 type);
 };
+
+struct CBike : public CVehicle 
+{
+	CBike* ctor(int id, uint8 createBy);   // createdBy ( script = 2 , game = 1 )
+};
+
+
+struct CBoat : public CVehicle 
+{
+
+	CBoat* ctor(int id, uint8 createBy);   // createdBy ( script = 2 , game = 1 )
+};
+
 
 struct CPed : public CPhysical
 {

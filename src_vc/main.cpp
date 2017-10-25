@@ -39,22 +39,37 @@ spawnCar(int id)
 		FindPlayerCoors(&playerpos);
 		int node = ThePaths.FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0, 0, 0);
 		if(node >= 0){
-			CAutomobile *v = (CAutomobile*)CVehicle__new(0x5DC);
-			v = v->ctor(id, 1);
+			CVehicle* pVehicle;
+		
+			if (CModelInfo::IsBoatModel(id)) {  
+				CBoat* pVeh = (CBoat*)CVehicle__new(0x4C0);
+				pVeh = pVeh->ctor(id, 1);
+				pVehicle = dynamic_cast<CVehicle*>(pVeh);
+			}
+			else if (CModelInfo::IsBikeModel(id)) {
+				CBike* pVeh = (CBike*)CVehicle__new(0x4EC);
+				pVeh = pVeh->ctor(id, 1);
+				pVehicle = dynamic_cast<CVehicle*>(pVeh);
+			}
+			else {
+				CAutomobile* pVeh = (CAutomobile*)CVehicle__new(0x5DC);
+				pVeh = pVeh->ctor(id, 1);
+				pVehicle = dynamic_cast<CVehicle*>(pVeh);
+			}
 
-			v->_.matrix.matrix.pos.x = ThePaths.nodes[node].x*0.125f;
-			v->_.matrix.matrix.pos.y = ThePaths.nodes[node].y*0.125f;
-			v->_.matrix.matrix.pos.z = ThePaths.nodes[node].z*0.125f + 4.0f;
-			float x = v->_.matrix.matrix.pos.x;
-			float y = v->_.matrix.matrix.pos.y;
-			float z = v->_.matrix.matrix.pos.z;
-			v->_.matrix.SetRotate(0.0f, 0.0f, 3.49f);
-			v->_.matrix.matrix.pos.x += x;
-			v->_.matrix.matrix.pos.y += y;
-			v->_.matrix.matrix.pos.z += z;
-			v->bfTypeStatus = v->bfTypeStatus & 7 | 0x20;
-			FIELD(int, v, 0x22C) = 1;
-			CWorld__Add(v);
+			pVehicle->_.matrix.matrix.pos.x = ThePaths.nodes[node].x*0.125f;
+			pVehicle->_.matrix.matrix.pos.y = ThePaths.nodes[node].y*0.125f;
+			pVehicle->_.matrix.matrix.pos.z = ThePaths.nodes[node].z*0.125f + 4.0f;
+			float x = pVehicle->_.matrix.matrix.pos.x;
+			float y = pVehicle->_.matrix.matrix.pos.y;
+			float z = pVehicle->_.matrix.matrix.pos.z;
+			pVehicle->_.matrix.SetRotate(0.0f, 0.0f, 3.49f);
+			pVehicle->_.matrix.matrix.pos.x += x;
+			pVehicle->_.matrix.matrix.pos.y += y;
+			pVehicle->_.matrix.matrix.pos.z += z;
+			pVehicle->bfTypeStatus = pVehicle->bfTypeStatus & 7 | 0x20;
+			CWorld__Add(pVehicle);
+			}
 		}
 	}
 }

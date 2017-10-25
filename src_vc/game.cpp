@@ -52,6 +52,14 @@ WRAPPER void CWanted::CheatWantedLevel(int level) { EAXJMP(0x4D1F80); }
 
 WRAPPER CAutomobile *CAutomobile::ctor(int id, uint8 type) { EAXJMP(0x59E620); }
 
+WRAPPER CBike *CBike::ctor(int id, uint8 createBy) { EAXJMP(0x615740); }
+
+WRAPPER CBoat *CBoat::ctor(int id, uint8 createBy) { EAXJMP(0x5A6470); }
+
+WRAPPER bool CModelInfo::IsBikeModel(int index) { EAXJMP(0x55F4E0); }
+
+WRAPPER bool CModelInfo::IsBoatModel(int index) { EAXJMP(0x55F540); }
+
 #if 0
 //
 // from SkyGfx:

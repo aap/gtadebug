@@ -255,8 +255,8 @@ delayedPatches(void)
 	}
 	patchDebugCam();
 
-	void privatehooks(void);
-	privatehooks();
+//	void privatehooks(void);
+//	privatehooks();
 
 	return 0;
 }

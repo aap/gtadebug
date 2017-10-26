@@ -24,6 +24,8 @@ CPlayerPed::ProcessControl_hooked(void)
 	ProcessControl(this);
 }
 
+DebugMenuEntry *carCol1;
+DebugMenuEntry *carCol2;
 
 void
 spawnCar(int id)
@@ -41,21 +43,22 @@ spawnCar(int id)
 		if(node >= 0){
 			CVehicle* pVehicle;
 		
-			if (CModelInfo::IsBoatModel(id)) {  
+			if(CModelInfo::IsBoatModel(id)){
 				CBoat* pVeh = (CBoat*)CVehicle__new(0x4C0);
 				pVeh = pVeh->ctor(id, 1);
 				pVehicle = dynamic_cast<CVehicle*>(pVeh);
-			}
-			else if (CModelInfo::IsBikeModel(id)) {
+			}else if (CModelInfo::IsBikeModel(id)){
 				CBike* pVeh = (CBike*)CVehicle__new(0x4EC);
 				pVeh = pVeh->ctor(id, 1);
 				pVehicle = dynamic_cast<CVehicle*>(pVeh);
-			}
-			else {
+			}else{
 				CAutomobile* pVeh = (CAutomobile*)CVehicle__new(0x5DC);
 				pVeh = pVeh->ctor(id, 1);
 				pVehicle = dynamic_cast<CVehicle*>(pVeh);
 			}
+
+			DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, pVehicle, 0x1A0));
+			DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, pVehicle, 0x1A1));
 
 			pVehicle->_.matrix.matrix.pos.x = ThePaths.nodes[node].x*0.125f;
 			pVehicle->_.matrix.matrix.pos.y = ThePaths.nodes[node].y*0.125f;
@@ -69,7 +72,6 @@ spawnCar(int id)
 			pVehicle->_.matrix.matrix.pos.z += z;
 			pVehicle->bfTypeStatus = pVehicle->bfTypeStatus & 7 | 0x20;
 			CWorld__Add(pVehicle);
-			}
 		}
 	}
 }
@@ -88,6 +90,14 @@ getWantedLevel(void)
 	CPlayerPed *p = FindPlayerPed();
 	CWanted *wanted = FIELD(CWanted*, p, 0x5f4);
 	return FIELD(int, wanted, 0x20);
+}
+
+WRAPPER void CStreaming__RemoveBuildingsNotInArea(int) { EAXJMP(0x40DAA0); }
+int &currArea = *(int*)0x978810;
+void
+areaChanged(void)
+{
+	CStreaming__RemoveBuildingsNotInArea(currArea);
 }
 
 int
@@ -113,6 +123,12 @@ delayedPatches10(int a, int b)
 			"fbiranch", "virgo", "greenwoo", "jetmax", "hotring", "sandking", "blistac", "polmav", "boxville", "benson",
 			"mesa", "rcgoblin", "hotrina", "hotrinb", "bloodra", "bloodrb", "vicechee",
 		};
+		static const char *areaNames[] = {
+			"Outside", "Hotel", "Mansion", "Bank", "Mall", "Strip club",
+			"Lawyer", "Coffee shop", "Concert hall", "Studio", "Rifle range",
+			"Biker bar", "Police station", "Everywhere", "Dirt", "Blood", "Oval ring",
+			"Malibu", "Print works"
+		};
 		DebugMenuEntry *e;
 		e = DebugMenuAddVar("Time & Weather", "Current Hour", &CClock::ms_nGameClockHours, nil, 1, 0, 23, nil);
 		DebugMenuEntrySetWrap(e, true);
@@ -124,6 +140,7 @@ delayedPatches10(int a, int b)
 		e = DebugMenuAddVar("Time & Weather", "New Weather", &CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x97F264, nil, 0.1f, 0.0f, 10.0f);
+		DebugMenuAddVar("Time & Weather", "Current Area", &currArea, areaChanged, 1, 0, 18, areaNames);
 
 		InterceptVmethod(&CPlayerPed::ProcessControl, &CPlayerPed::ProcessControl_hooked, 0x694D90);
 		DebugMenuAddVarBool32("Player", "Invincible", &isPlayerInvincible, nil);
@@ -136,6 +153,9 @@ delayedPatches10(int a, int b)
 
 		static int vehId = 130;
 		DebugMenuAddVar("Spawn", "Spawn Vehicle ID", &vehId, nil, 1, 130, 236, vehnames);
+		static uchar dummy;
+		carCol1 = DebugMenuAddVar("Spawn", "First colour", &dummy, nil, 1, 0, 255, nil);
+		carCol2 = DebugMenuAddVar("Spawn", "Second colour", &dummy, nil, 1, 0, 255, nil);
 		DebugMenuAddCmd("Spawn", "Spawn Vehicle", [](){ spawnCar(vehId); });
 		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ spawnCar(141); });
 		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ spawnCar(145); });

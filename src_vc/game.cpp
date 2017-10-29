@@ -20,6 +20,7 @@ WRAPPER void CStreaming__LoadAllRequestedModels(bool b) { EAXJMP(0x40B5F0); }
 WRAPPER void CStreaming__SetModelIsDeletable(int id) { EAXJMP(0x40AEA0); }
 WRAPPER void CStreaming__SetModelTxdIsDeletable(int id) { EAXJMP(0x40ADF0); }
 
+WRAPPER bool CPed::IsPedInControl(void) { EAXJMP(0x501950); }
 WRAPPER CVehicle *CVehicle__new(int size) { EAXJMP(0x5BAB20); }
 WRAPPER void CWorld__Add(CEntity *e) { EAXJMP(0x4DB3F0); }
 
@@ -57,8 +58,8 @@ WRAPPER CBike *CBike::ctor(int id, uint8 createBy) { EAXJMP(0x615740); }
 WRAPPER CBoat *CBoat::ctor(int id, uint8 createBy) { EAXJMP(0x5A6470); }
 
 WRAPPER bool CModelInfo::IsBikeModel(int index) { EAXJMP(0x55F4E0); }
-
 WRAPPER bool CModelInfo::IsBoatModel(int index) { EAXJMP(0x55F540); }
+WRAPPER CBaseModelInfo *CModelInfo::GetModelInfo(const char *name, int *id) { EAXJMP(0x55F7D0); }
 
 #if 0
 //

@@ -100,6 +100,70 @@ areaChanged(void)
 	CStreaming__RemoveBuildingsNotInArea(currArea);
 }
 
+struct CDirectory
+{
+	struct DirectoryInfo {
+		uint32 offset;
+		uint32 size;
+		char name[24];
+	};
+	DirectoryInfo *entries;
+	int32 maxFiles;
+	int32 numFiles;
+	bool FindItem(const char *name, uint32 *offset, uint32 *size);
+};
+WRAPPER bool CDirectory::FindItem(const char *name, uint32 *offset, uint32 *size) { EAXJMP(0x487220); }
+CDirectory *&CStreaming__ms_pExtraObjectsDir = *(CDirectory**)0xA10730;
+
+WRAPPER void ChangePlayerModel(const char *name) { EAXJMP(0x4AE8C0); }
+const char *playermodels[] = {
+	"player", "player2", "player3", "player4", "player5", "player6", "player7",
+	"player8", "player9", "play10", "play11", "play12",
+	"igken", "igcolon",	// friends
+	"igbuddy", "igbudy2", "igbudy3",	// lance
+	"igjezz", "igdick", "igpercy",	// love fist
+	"igphil", "ighlary", "igmike",	// heist
+	"igmerc", "igmerc2",	// mercedes
+	"igcandy",
+	"igsonny", "igdiaz", "iggonz",	// enemies
+
+	"mba", "mbb",	// sonny goons
+	"pga", "pgb",	// player goons
+	"cla", "clb",	// diaz goons
+	"cba", "cbb",	// cubans
+	"hna", "hnb",	// haitians
+	"bka", "bkb",	// bikers
+	"sga", "sgb",	// wanna be gangsters
+	"gda",	// security
+	"vice1", "vice2", "vice3", "vice4", "vice5", "vice6", "vice7",
+};
+int playermodel;
+void
+changePlayerModel(void)
+{
+	uint32 foo;
+	// ChangePlayerModel only works with extra objects
+	if(CStreaming__ms_pExtraObjectsDir->FindItem(playermodels[playermodel], &foo, &foo))
+		ChangePlayerModel(playermodels[playermodel]);
+	else{
+		// ... so if it's not an extra object, the easiest way is to make it one temporarily
+		// and hope that everything goes well
+		int modelindex;
+		CBaseModelInfo *mi = CModelInfo::GetModelInfo(playermodels[playermodel], &modelindex);
+		if(mi){
+			CDirectory::DirectoryInfo direntry;
+			direntry.offset = CStreaming__ms_aInfoForModel[modelindex].position;
+			direntry.size = CStreaming__ms_aInfoForModel[modelindex].size;
+			strcpy(direntry.name, playermodels[playermodel]);
+
+			assert(CStreaming__ms_pExtraObjectsDir->numFiles < CStreaming__ms_pExtraObjectsDir->maxFiles);
+			CStreaming__ms_pExtraObjectsDir->entries[CStreaming__ms_pExtraObjectsDir->numFiles++] = direntry;
+			ChangePlayerModel(playermodels[playermodel]);
+			CStreaming__ms_pExtraObjectsDir->numFiles--;
+		}
+	}
+}
+
 int
 delayedPatches10(int a, int b)
 {
@@ -146,6 +210,8 @@ delayedPatches10(int a, int b)
 		DebugMenuAddVarBool32("Player", "Invincible", &isPlayerInvincible, nil);
 		DebugMenuAddCmd("Player", "Clear Wanted Level", [](){ setWantedLevel(0); });
 		DebugMenuAddCmd("Player", "Increase Wanted Level", [](){ setWantedLevel(getWantedLevel()+2); });
+		e = DebugMenuAddInt32("Player", "Player model", &playermodel, changePlayerModel, 1, 0, nelem(playermodels)-1, playermodels);
+		DebugMenuEntrySetWrap(e, true);
 
 		DebugMenuAddCmd("Cheats", "Weapons 1", [](){ ((void (*)(void))0x4AEE00)(); });
 		DebugMenuAddCmd("Cheats", "Weapons 2", [](){ ((void (*)(void))0x4AEC70)(); });

@@ -1,12 +1,16 @@
 
 // VC
 
+struct CBaseModelInfo
+{
+	int todo;
+};
+
 class CModelInfo {
 public:
-
-    static bool IsBikeModel(int index);
-    static bool IsBoatModel(int index);
-
+	static bool IsBikeModel(int index);
+	static bool IsBoatModel(int index);
+	static CBaseModelInfo *GetModelInfo(const char *name, int *id);
 };
 
 class CTimer
@@ -196,8 +200,8 @@ struct CStreamingInfo
 	uint8 loadState;
 	uint8 flags;
 	int16 nextID;
-	int position;
-	int size;
+	uint32 position;
+	uint32 size;
 };
 static_assert(sizeof(CStreamingInfo) == 0x14, "CStreamingInfo: size error");
 
@@ -236,9 +240,11 @@ struct CPlaceable
 };
 static_assert(sizeof(CPlaceable) == 0x48, "CPlaceable: size error");
 
+struct CEntityVtbl;
+
 struct CEntity
 {
-	void *vtable;
+	CEntityVtbl *vtable;
 	CPlaceable _;
 	RpClump *pClump;
 	char bfTypeStatus;
@@ -285,6 +291,7 @@ struct CBoat : public CVehicle
 
 struct CPed : public CPhysical
 {
+	bool IsPedInControl(void);
 };
 
 struct CPlayerPed : public CPed

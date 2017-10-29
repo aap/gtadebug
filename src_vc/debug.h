@@ -24,6 +24,8 @@ typedef int64_t int64;
 
 #define nil NULL
 
+#define nelem(a) (sizeof(a)/sizeof(a[0]))
+
 struct GlobalScene
 {
 	RpWorld *world;

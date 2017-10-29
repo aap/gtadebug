@@ -129,6 +129,7 @@ const char *playermodels[] = {
 
 	"mba", "mbb",	// sonny goons
 	"pga", "pgb",	// player goons
+	"dgoona", "dgoonb",	// CS player/diaz goons
 	"cla", "clb",	// diaz goons
 	"cba", "cbb",	// cubans
 	"hna", "hnb",	// haitians
@@ -136,8 +137,16 @@ const char *playermodels[] = {
 	"sga", "sgb",	// wanna be gangsters
 	"gda",	// security
 	"vice1", "vice2", "vice3", "vice4", "vice5", "vice6", "vice7",
+	"csassa", "csassb", "csassc",	// assassins
+};
+const char *csplayermodels[] = {
+	"sfrenda", "sfrendb",	// sonny's friends
+	"csavery", "cscolo", "cskent", "csbigm", "csbj", 
+	"csdeal", "csdirec", "csdlove", "csdoris", "csdwayn", "csjetro",
+	"csgonz", "cskelly", "csrich", "csumbto"
 };
 int playermodel;
+int csplayermodel;
 void
 changePlayerModel(void)
 {
@@ -162,6 +171,13 @@ changePlayerModel(void)
 			CStreaming__ms_pExtraObjectsDir->numFiles--;
 		}
 	}
+}
+void
+changeCsPlayerModel(void)
+{
+	uint32 foo;
+	if(CStreaming__ms_pExtraObjectsDir->FindItem(playermodels[playermodel], &foo, &foo))
+		ChangePlayerModel(csplayermodels[csplayermodel]);
 }
 
 int
@@ -212,6 +228,9 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Player", "Increase Wanted Level", [](){ setWantedLevel(getWantedLevel()+2); });
 		e = DebugMenuAddInt32("Player", "Player model", &playermodel, changePlayerModel, 1, 0, nelem(playermodels)-1, playermodels);
 		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddInt32("Player", "Player model (CS)", &csplayermodel, changeCsPlayerModel, 1, 0, nelem(csplayermodels)-1, csplayermodels);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddCmd("Player", "Switch to Cutscene model", [](){ ChangePlayerModel("CSplay"); });
 
 		DebugMenuAddCmd("Cheats", "Weapons 1", [](){ ((void (*)(void))0x4AEE00)(); });
 		DebugMenuAddCmd("Cheats", "Weapons 2", [](){ ((void (*)(void))0x4AEC70)(); });

@@ -48,17 +48,30 @@ CCamera::InitialiseCameraForDebugMode(void)
 	this->Cams[2].Mode = 6;
 //	activatedFromKeyboard = keytemp;
 //	CPad::m_bMapPadOneToPadTwo = 1;
+
+	LoadSavedCams();
 }
 
 void
 CCam::Process_Debug(float*, float, float, float)
 {
 	static float speed = 0.0f;
+	static float panspeedX = 0.0f;
+	static float panspeedY = 0.0f;
 
 	if(CTRLJUSTDOWN('C')){
 		if(controlMode == CONTROL_CAMERA) controlMode = CONTROL_PLAYER;
 		else if(controlMode == CONTROL_PLAYER) controlMode = CONTROL_CAMERA;
 	}
+
+	if(KEYJUSTDOWN('Z') && controlMode == CONTROL_CAMERA)
+		SaveCam(this);
+	if(KEYJUSTDOWN('X') && controlMode == CONTROL_CAMERA)
+		DeleteSavedCams();
+	if(KEYJUSTDOWN('Q') && controlMode == CONTROL_CAMERA)
+		PrevSavedCam(this);
+	if(KEYJUSTDOWN('E') && controlMode == CONTROL_CAMERA)
+		NextSavedCam(this);
 
 	RwCameraSetNearClipPlane(Scene.camera, 0.9f);
 	this->FOV = gFOV;
@@ -89,9 +102,34 @@ CCam::Process_Debug(float*, float, float, float)
 	if(speed > 70.0f) speed = 70.0f;
 	if(speed < -70.0f) speed = -70.0f;
 
+	if(KEYDOWN((RsKeyCodes)rsRIGHT) && controlMode == CONTROL_CAMERA)
+		panspeedX += 0.1f;
+	else if(KEYDOWN((RsKeyCodes)rsLEFT) && controlMode == CONTROL_CAMERA)
+		panspeedX -= 0.1f;
+	else
+		panspeedX = 0.0f;
+	if(panspeedX > 70.0f) panspeedX = 70.0f;
+	if(panspeedX < -70.0f) panspeedX = -70.0f;
+
+	if(KEYDOWN((RsKeyCodes)rsUP) && controlMode == CONTROL_CAMERA)
+		panspeedY += 0.1f;
+	else if(KEYDOWN((RsKeyCodes)rsDOWN) && controlMode == CONTROL_CAMERA)
+		panspeedY -= 0.1f;
+	else
+		panspeedY = 0.0f;
+	if(panspeedY > 70.0f) panspeedY = 70.0f;
+	if(panspeedY < -70.0f) panspeedY = -70.0f;
+
 	this->Front = vec - this->Source;
 	this->Front.Normalise();
 	this->Source = this->Source + this->Front*speed;
+
+	CVector up = { 0.0f, 0.0f, 1.0f };
+	CVector right;
+	CVector::CrossProduct(&right, &Front, &up);
+	CVector::CrossProduct(&up, &right, &Front);
+	Source = Source + up*panspeedY + right*panspeedX;
+
 	if(this->Source.z < -450.0f)
 		this->Source.z = -450.0f;
 
@@ -331,6 +369,11 @@ patchDebugCam(void)
 		e = DebugMenuAddVar("Debug", "Debug Camera Control", &controlMode, nil, 1, CONTROL_CAMERA, CONTROL_PLAYER, controlStr);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Debug", "Debug Camera FOV", &gFOV, nil, 1.0f, 5.0f, 180.0f);
+		DebugMenuAddCmd("Debug", "Save Camera Position", [](){ SaveCam(&TheCamera.Cams[2]); });
+		DebugMenuAddCmd("Debug", "Cycle Next", [](){ NextSavedCam(&TheCamera.Cams[2]); });
+		DebugMenuAddCmd("Debug", "Cycle Prev", [](){ PrevSavedCam(&TheCamera.Cams[2]); });
+		DebugMenuAddCmd("Debug", "Delete Camera Positions", DeleteSavedCams);
+
 		DebugMenuAddCmd("Debug", "Toggle HUD", [](){ toggleHudSwitch = 1; });
 	}
 }

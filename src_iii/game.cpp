@@ -9,6 +9,7 @@ RsGlobalType &RsGlobal = *(RsGlobalType*)0x8F4360;
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
 
 WRAPPER void CVector::Normalise(void) { EAXJMP(0x4BA560); };
+WRAPPER void CVector::CrossProduct(CVector *out, CVector *a, CVector *b) { EAXJMP(0x4BA350); }
 
 int &CTimer::m_snTimeInMilliseconds = *(int*)0x885B48;
 

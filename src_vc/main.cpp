@@ -137,7 +137,8 @@ const char *playermodels[] = {
 	"sga", "sgb",	// wanna be gangsters
 	"gda",	// security
 	"vice1", "vice2", "vice3", "vice4", "vice5", "vice6", "vice7",
-	"csassa", "csassb", "csassc",	// assassins
+//	"csassa", "csassb", "csassc",	// assassins
+	"player_x1", "player_x2", "player_x3", "player_x4",
 };
 const char *csplayermodels[] = {
 	"sfrenda", "sfrendb",	// sonny's friends
@@ -180,6 +181,16 @@ changeCsPlayerModel(void)
 		ChangePlayerModel(csplayermodels[csplayermodel]);
 }
 
+float &CWeather__Wind = *(float*)0x97533C;
+
+void
+weatherChanged(void)
+{
+	// this doesn't get reset always for some reason and we'll have splashes
+	// at nice weather. so just do this:
+	CWeather__Wind = 0.0f;
+}
+
 int
 delayedPatches10(int a, int b)
 {
@@ -215,9 +226,9 @@ delayedPatches10(int a, int b)
 		e = DebugMenuAddVar("Time & Weather", "Current Minute", &CClock::ms_nGameClockMinutes,
 			[](){ CWeather::InterpolationValue = CClock::ms_nGameClockMinutes/60.0f + CClock::ms_nGameClockSeconds/3600.0f; }, 1, 0, 59, nil);
 		DebugMenuEntrySetWrap(e, true);
-		e = DebugMenuAddVar("Time & Weather", "Old Weather", &CWeather::OldWeatherType, nil, 1, 0, 5, weathers);
+		e = DebugMenuAddVar("Time & Weather", "Old Weather", &CWeather::OldWeatherType, weatherChanged, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
-		e = DebugMenuAddVar("Time & Weather", "New Weather", &CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
+		e = DebugMenuAddVar("Time & Weather", "New Weather", &CWeather::NewWeatherType, weatherChanged, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x97F264, nil, 0.1f, 0.0f, 10.0f);
 		DebugMenuAddVar("Time & Weather", "Current Area", &currArea, areaChanged, 1, 0, 18, areaNames);
@@ -271,6 +282,30 @@ delayedPatches10(int a, int b)
 void
 patchVC10(void)
 {
+	static char *playernames[] = {
+		"player", "player2", "player3", "player4",
+		"player5", "player6", "player7", "player8",
+		"player9", "play10", "play11",
+		"igken", "igcandy", "igsonny", "igbuddy", "igjezz",
+		"ighlary", "igphil", "igmerc", "igdick", "igdiaz",
+		"player_x3", "player_x4",
+		""
+	};
+	static char *csplayernames[] = {
+		"csplay", "csplay2", "csplay3", "csplay4",
+		"csplay5", "csplay6", "csplay7", "csplay8",
+		"csplay9", "csplay10", "csplay11",
+		"csken", "cscandy", "cssonny", "csbuddy", "csjezz",
+		"cshlary", "csphil", "csmerc", "csdick", "csdiaz",
+		"csplay_x3", "csplay_x4",
+		""
+	};
+	Patch(0x40AAAA + 3, csplayernames);
+	Patch(0x40AAB8 + 3, csplayernames);
+	Patch(0x40AA96 + 3, playernames);
+
+//	Nop(0x57C9D7, 5);
+
 	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x5FFAFE);
 }
 

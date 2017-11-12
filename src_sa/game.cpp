@@ -1,6 +1,7 @@
 #include "debug.h"
 
 GlobalScene &Scene = *(GlobalScene*)0xC17038;
+CCamera &TheCamera = *(CCamera*)0xB6F028;
 
 WRAPPER CVehicle *FindPlayerVehicle(int, bool) { EAXJMP(0x56E0D0); }
 WRAPPER CPlayerPed *FindPlayerPed(int) { EAXJMP(0x56E210); }

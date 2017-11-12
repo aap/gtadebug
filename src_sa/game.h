@@ -680,6 +680,7 @@ struct CCamera : public CPlaceable
 	void CopyCameraMatrixToRWCam(bool);
 };
 static_assert(offsetof(CCamera, pToGarageWeAreIn) == 0x81C, "CCamera: error");
+extern CCamera &TheCamera;
 
 CVehicle *FindPlayerVehicle(int, bool);
 CPlayerPed *FindPlayerPed(int);

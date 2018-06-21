@@ -1,5 +1,11 @@
 // SA
 
+class CGeneral
+{
+public:
+	static double GetATanOfXY(float x, float y);
+};
+
 struct CTimer
 {
 	static float &ms_fTimeScale;

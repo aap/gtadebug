@@ -9,9 +9,6 @@ WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4BC1E0); }
 WRAPPER CPlayerPed *FindPlayerPed(void) { EAXJMP(0x4BC120); }
 WRAPPER void FindPlayerCoors(CVector*) { EAXJMP(0x4BC240); }
 
-WRAPPER void CVector::CrossProduct(CVector *out, CVector *a, CVector *b) { EAXJMP(0x4E00B0); }
-WRAPPER void CVector::Normalise(void) { EAXJMP(0x4DFEA0); }
-
 WRAPPER void CMatrix::SetRotate(float x, float y, float z) { EAXJMP(0x4DF240); }
 
 CStreamingInfo *CStreaming__ms_aInfoForModel;

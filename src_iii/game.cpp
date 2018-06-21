@@ -8,8 +8,7 @@ GlobalScene &Scene = *(GlobalScene*)0x726768;
 RsGlobalType &RsGlobal = *(RsGlobalType*)0x8F4360;
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
 
-WRAPPER void CVector::Normalise(void) { EAXJMP(0x4BA560); };
-WRAPPER void CVector::CrossProduct(CVector *out, CVector *a, CVector *b) { EAXJMP(0x4BA350); }
+WRAPPER double CGeneral::GetATanOfXY(float x, float y) { EAXJMP(0x48CC30); }
 
 int &CTimer::m_snTimeInMilliseconds = *(int*)0x885B48;
 
@@ -30,8 +29,13 @@ short *CPad::NewKeyState = (short*)0x6E60D0; // 312
 short *CPad::OldKeyState = (short*)0x6F1E70; // 312
 CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
 CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
-bool &CPad::m_bMapPadOneToPadTwo = *(bool*)0x46D572;
+bool &CPad::m_bMapPadOneToPadTwo = *(bool*)0x95CD48;
 WRAPPER CPad *CPad::GetPad(int id) { EAXJMP(0x492F60); }
+WRAPPER bool CPad::GetLookBehindForCar(void) { EAXJMP(0x4932F0); }
+WRAPPER bool CPad::GetLookBehindForPed(void) { EAXJMP(0x493320); }
+WRAPPER bool CPad::GetLookLeft(void) { EAXJMP(0x493290); }
+WRAPPER bool CPad::GetLookRight(void) { EAXJMP(0x4932C0); }
+
 
 WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes key) { EAXJMP(0x58D2A0); }
 WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes key) { EAXJMP(0x58D8A0); }
@@ -40,6 +44,7 @@ WRAPPER bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes key) 
 
 CBaseModelInfo **CModelInfo::ms_modelInfoPtrs; // set later
 WRAPPER CBaseModelInfo *CModelInfo::GetModelInfo(const char *s, int id) { EAXJMP(0x50B860); }
+WRAPPER bool CModelInfo::IsBoatModel(int index) { EAXJMP(0x50BB90); }
 
 
 WRAPPER void CSprite2d::Draw(CRect const &, CRGBA const &) { EAXJMP(0x51ED50); }
@@ -78,6 +83,7 @@ WRAPPER void FindPlayerCoors(CVector*) { EAXJMP(0x4A1030); }
 WRAPPER bool CPed::IsPedInControl(void) { EAXJMP(0x4CE6C0); }
 
 WRAPPER CAutomobile *CAutomobile::ctor(int id, uint8 type) { EAXJMP(0x52C6B0); }
+WRAPPER CBoat *CBoat::ctor(int id, uint8 type) { EAXJMP(0x53E3E0); }
 
 WRAPPER void AsciiToUnicode(char const *,ushort *) { EAXJMP(0x5009C0); }
 WRAPPER void debug(const char *fmt, ...) { EAXJMP(0x405DB0); }

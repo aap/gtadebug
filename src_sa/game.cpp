@@ -3,14 +3,13 @@
 GlobalScene &Scene = *(GlobalScene*)0xC17038;
 CCamera &TheCamera = *(CCamera*)0xB6F028;
 
+WRAPPER double CGeneral::GetATanOfXY(float x, float y) { EAXJMP(0x53CC70); }
+
 WRAPPER CVehicle *FindPlayerVehicle(int, bool) { EAXJMP(0x56E0D0); }
 WRAPPER CPlayerPed *FindPlayerPed(int) { EAXJMP(0x56E210); }
 WRAPPER void CPlayerPed::SetWantedLevel(int n) { EAXJMP(0x609F10); }
 
 WRAPPER void CIplStore::AddIplsNeededAtPosn(CVector *pos) { EAXJMP(0x4045B0); }
-
-WRAPPER void CVector::CrossProduct(CVector *out, CVector *a, CVector *b) { EAXJMP(0x59C730); }
-WRAPPER void CVector::Normalise(void) { EAXJMP(0x59C910); }
 
 WRAPPER void CDraw::SetFOV(float fov) { EAXJMP(0x6FF410); }
 

@@ -10,6 +10,25 @@ CControllerConfigManager *ctrldummy;
 
 #define FIELD(type, var, offset) *(type*)((uint8*)var + offset)
 
+void (*DebugMenuProcess)(void);
+void (*DebugMenuRender)(void);
+static void stub(void) { }
+
+void
+DebugMenuInit(void)
+{
+	if(DebugMenuLoad()){
+		DebugMenuProcess = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuProcess");
+		DebugMenuRender = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuRender");
+	}
+	if(DebugMenuProcess == NULL || DebugMenuRender == NULL){
+		DebugMenuProcess = stub;
+		DebugMenuRender = stub;
+	}
+
+}
+
+
 static int isPlayerInvincible;
 void (__thiscall *CPlayerPed::ProcessControl)(CPlayerPed*);
 void
@@ -22,6 +41,18 @@ CPlayerPed::ProcessControl_hooked(void)
 	ProcessControl(this);
 }
 
+int disableHud;
+void (*Render2dStuff_orig)(void);
+void
+Render2dStuff(void)
+{
+	if(CTRLJUSTDOWN('H') && TheCamera.WorldViewerBeingUsed)
+		disableHud = !disableHud;
+	if(!disableHud)
+		Render2dStuff_orig();
+	else
+		DebugMenuRender();
+}
 
 WRAPPER void VehicleCheat(int id) { EAXJMP(0x43A0B0); }
 
@@ -32,6 +63,8 @@ delayedPatches(void)
 	if(IsAlreadyRunning())
 		return 1;
 	if(DebugMenuLoad()){
+		DebugMenuInit();
+
 		static const char *weathers[] = {
 			"Extrasunny LA", "Sunny LA", "Extrasunny Smog LA", "Sunny Smog LA", "Cloudy LA",
 			"Sunny SF", "Extrasunny SF", "Cloudy SF", "Rainy SF", "Foggy SF",
@@ -85,6 +118,7 @@ delayedPatches(void)
 		DebugMenuAddCmd("Spawn", "Spawn Admiral", [](){ VehicleCheat(445); });
 		DebugMenuAddCmd("Spawn", "Spawn Stretch", [](){ VehicleCheat(409); });
 		DebugMenuAddCmd("Spawn", "Spawn BJ Injection", [](){ VehicleCheat(424); });
+		DebugMenuAddCmd("Spawn", "Spawn Super GT", [](){ VehicleCheat(506); });
 		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ VehicleCheat(420); });
 		DebugMenuAddCmd("Spawn", "Spawn Police (LA)", [](){ VehicleCheat(596); });
 		DebugMenuAddCmd("Spawn", "Spawn Police Ranger", [](){ VehicleCheat(599); });
@@ -220,9 +254,9 @@ delayedPatches(void)
 		DebugMenuAddVar("PostFX", "Color1 multiplier", &CPostEffects::m_colour1Multiplier, nil, 0.1f, 0.0f, 20.0f);
 		DebugMenuAddVar("PostFX", "Color2 multiplier", &CPostEffects::m_colour2Multiplier, nil, 0.1f, 0.0f, 20.0f);
 
-		DebugMenuAddVar("PostFX", "Screen extra mult change rate", &CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE, nil, 0.001f, 0.0f, 1.0f);
-		DebugMenuAddVar("PostFX", "Screen extra mult base cap", &CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP, nil, 0.1f, 0.0f, 1.0f);
-		DebugMenuAddVar("PostFX", "Screen extra mult base mult", &CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT, nil, 0.1f, 0.0f, 1.0f);
+		DebugMenuAddVar("PostFX", "Screen extra mult change rate", &CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE, nil, 0.001f, 0.001f, 1.0f);
+		DebugMenuAddVar("PostFX", "Screen extra mult base cap", &CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP, nil, 0.1f, 0.1f, 1.0f);
+		DebugMenuAddVar("PostFX", "Screen extra mult base mult", &CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT, nil, 0.1f, 0.1f, 10.0f);
 
 		DebugMenuAddVarBool8("PostFX", "Radiosity", (int8_t*)&CPostEffects::m_bRadiosity, nil);
 		DebugMenuAddVar("PostFX", "Radiosity Filter Passes", &CPostEffects::m_RadiosityFilterPasses, nil, 1, 0, 10, nil);
@@ -252,7 +286,13 @@ delayedPatches(void)
 		DebugMenuAddVar("PostFX", "SpeedFX Alpha", &CPostEffects::m_SpeedFXAlpha, nil, 1, 0, 255, nil);
 
 		DebugMenuAddVarBool8("PostFX", "TakePhoto", (int8_t*)0xC8A7C1, nil);
+
+
+		DebugMenuAddVarBool32("Debug", "Disable HUD", &disableHud, nil);
 	}
+
+	InterceptCall(&Render2dStuff_orig, Render2dStuff, 0x53EB12);
+
 	patchDebugCam();
 
 //	void privatehooks(void);

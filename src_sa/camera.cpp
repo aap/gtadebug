@@ -1,5 +1,8 @@
 #include "debug.h"
 
+#define GINPUT_COMPILE_SA_VERSION
+#include <GInputAPI.h>
+
 // SA
 
 static uintptr thisptr;
@@ -34,6 +37,16 @@ CCamera::InitialiseCameraForDebugMode(void)
 	this->Cams[2].Mode = 6;
 //	CPad::m_bMapPadOneToPadTwo = 1;
 
+	Cams[2].Source = Cams[ActiveCam].Source;
+	CVector nfront = Cams[ActiveCam].Front;
+	float groundDist = sqrt(nfront.x*nfront.x + nfront.y*nfront.y);
+	Cams[2].Beta = CGeneral::GetATanOfXY(nfront.x, nfront.y);
+	Cams[2].Alpha = CGeneral::GetATanOfXY(groundDist, nfront.z);
+	while(Cams[2].Beta >= PI) Cams[2].Beta -= 2.0f*PI;
+	while(Cams[2].Beta < -PI) Cams[2].Beta += 2.0f*PI;
+	while(Cams[2].Alpha >= PI) Cams[2].Alpha -= 2.0f*PI;
+	while(Cams[2].Alpha < -PI) Cams[2].Alpha += 2.0f*PI;
+
 	LoadSavedCams();
 }
 
@@ -61,18 +74,18 @@ CCam::Process_Debug(float*, float, float, float)
 	RwCameraSetNearClipPlane(Scene.camera, 0.9f);
 	this->FOV = gFOV;
 	this->Alpha += DEG2RAD(CPad::GetPad(1)->NewState.LEFTSTICKY*0.02f); // magic
-	this->Beta  += CPad::GetPad(1)->NewState.LEFTSTICKX * 0.02617994f * 0.052631579f; // magic
+	this->Beta  -= CPad::GetPad(1)->NewState.LEFTSTICKX * 0.02617994f * 0.052631579f; // magic
 	if(controlMode == CONTROL_CAMERA && CPad::NewMouseControllerState.lmb){
 		this->Alpha += DEG2RAD(CPad::NewMouseControllerState.Y/2.0f);
-		this->Beta += DEG2RAD(CPad::NewMouseControllerState.X/2.0f);
+		this->Beta -= DEG2RAD(CPad::NewMouseControllerState.X/2.0f);
 	}
 
 	if(this->Alpha > DEG2RAD(89.5f)) this->Alpha = DEG2RAD(89.5f);
 	if(this->Alpha < DEG2RAD(-89.5f)) this->Alpha = DEG2RAD(-89.5f);
 
 	CVector vec;
-	vec.x = this->Source.x + sin(this->Beta) * cos(this->Alpha) * 3.0f;
-	vec.y = this->Source.y + cos(this->Beta) * cos(this->Alpha) * 3.0f;
+	vec.x = this->Source.x + cos(this->Beta) * cos(this->Alpha) * 3.0f;
+	vec.y = this->Source.y + sin(this->Beta) * cos(this->Alpha) * 3.0f;
 	vec.z = this->Source.z + sin(this->Alpha) * 3.0f;
 
 	if(CPad::GetPad(1)->NewState.SQUARE ||
@@ -87,9 +100,9 @@ CCam::Process_Debug(float*, float, float, float)
 	if(speed > 70.0f) speed = 70.0f;
 	if(speed < -70.0f) speed = -70.0f;
 
-	if(KEYDOWN((RsKeyCodes)rsRIGHT) && controlMode == CONTROL_CAMERA)
+	if((KEYDOWN((RsKeyCodes)rsRIGHT) || KEYDOWN((RsKeyCodes)'D')) && controlMode == CONTROL_CAMERA)
 		panspeedX += 0.1f;
-	else if(KEYDOWN((RsKeyCodes)rsLEFT) && controlMode == CONTROL_CAMERA)
+	else if((KEYDOWN((RsKeyCodes)rsLEFT) || KEYDOWN((RsKeyCodes)'A')) && controlMode == CONTROL_CAMERA)
 		panspeedX -= 0.1f;
 	else
 		panspeedX = 0.0f;
@@ -111,8 +124,8 @@ CCam::Process_Debug(float*, float, float, float)
 
 	CVector up = { 0.0f, 0.0f, 1.0f };
 	CVector right;
-	CVector::CrossProduct(&right, &Front, &up);
-	CVector::CrossProduct(&up, &right, &Front);
+	right = CrossProduct(Front, up);
+	up = CrossProduct(right, Front);
 	Source = Source + up*panspeedY + right*panspeedX;
 
 	if(this->Source.z < -450.0f)
@@ -172,7 +185,7 @@ toggleCam(void)
 {
 	CCamera *cam = (CCamera*)thisptr;
 	CPad *pad = CPad::GetPad(1);
-	int keydown = CTRLJUSTDOWN('D') || toggleDebugCam;
+	int keydown = CTRLJUSTDOWN('B') || toggleDebugCam;
 	if(JUSTDOWN(CIRCLE) || keydown){
 		toggleDebugCam = 0;
 		cam->WorldViewerBeingUsed = !cam->WorldViewerBeingUsed;
@@ -264,7 +277,7 @@ void copyToRw(void)
 	CCamera *cam = (CCamera*)thisptr;
 
 	CVector right;
-	CVector::CrossProduct(&right, &cam->Cams[2].Up, &cam->Cams[2].Front);
+	right = CrossProduct(cam->Cams[2].Up, cam->Cams[2].Front);
 	cam->m_pCoords->matrix.right = *(RwV3d*)&right;
 	cam->m_pCoords->matrix.up = *(RwV3d*)&cam->Cams[2].Front;
 	cam->m_pCoords->matrix.at = *(RwV3d*)&cam->Cams[2].Up;
@@ -299,6 +312,14 @@ copyToRWHook(void)
 }
 
 
+// TEMP TEMP TEMP
+IGInputPad *ginput;
+void
+switchPad(void)
+{
+	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)TRUE);
+}
+
 void
 patchDebugCam(void)
 {
@@ -319,6 +340,11 @@ patchDebugCam(void)
 		DebugMenuAddCmd("Debug", "Cycle Next", [](){ NextSavedCam(&TheCamera.Cams[2]); });
 		DebugMenuAddCmd("Debug", "Cycle Prev", [](){ PrevSavedCam(&TheCamera.Cams[2]); });
 		DebugMenuAddCmd("Debug", "Delete Camera Positions", DeleteSavedCams);
+
+// TEMP TEMP TEMP
+		if(GInput_Load(&ginput))
+			DebugMenuAddCmd("Debug", "Switch Pad 1", switchPad);
+
 
 		DebugMenuAddVarBool8("Debug", "Black bars", (int8*)0xB6F065, nil);
 	}

@@ -171,6 +171,7 @@ public:
 
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &OldMouseControllerState;
+	static bool &m_bMapPadOneToPadTwo;
 
 	static CPad *GetPad(int);
 };
@@ -442,6 +443,7 @@ struct CCam
 
 	void Process(void);
 	void Process_Debug(float*, float, float, float);
+	void Process_Kalvin(float*, float, float, float);	// for VC beta trailer
 	void GetVectorsReadyForRW(void);
 };
 static_assert(sizeof(CCam) == 0x1CC, "CCam: size error");

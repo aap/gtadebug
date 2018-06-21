@@ -27,26 +27,78 @@ bool CRenderer__SetupBigBuildingVisibility(CEntity *e)
 
 
 enum ModelIDs {
+	MODELID_LANDSTAL = 90,
+	MODELID_IDAHO = 91,
 	MODELID_STINGER = 92,
+	MODELID_LINERUN = 93,
+	MODELID_PEREN = 94,
+	MODELID_SENTINEL = 95,
+	MODELID_PATRIOT = 96,
+	MODELID_FIRETRUK = 97,
+	MODELID_TRASH = 98,
+	MODELID_STRETCH = 99,
+	MODELID_MANANA = 100,
 	MODELID_INFERNUS = 101,
+	MODELID_BLISTA = 102,
+	MODELID_PONY = 103,
+	MODELID_MULE = 104,
 	MODELID_CHEETAH = 105,
+	MODELID_AMBULAN = 106,
+	MODELID_FBICAR = 107,
+	MODELID_MOONBEAM = 108,
 	MODELID_ESPERANTO = 109,
 	MODELID_TAXI = 110,
+	MODELID_KURUMA = 111,
+	MODELID_BOBCAT = 112,
+	MODELID_MRWHOOP = 113,
+	MODELID_BFINJECT = 114,
+	MODELID_CORPSE = 115,
 	MODELID_POLICE = 116,
+	MODELID_ENFORCER = 117,
+	MODELID_SECURICAR = 118,
 	MODELID_BANSHEE = 119,
-	MODELID_DODO = 126,
-	MODELID_YAKUZA = 136,
-
-	// these crash when spawned
+	MODELID_PREDATOR = 120,
+	MODELID_BUS = 121,
+	MODELID_RHINO = 122,
+	MODELID_BARRACKS = 123,
 	MODELID_TRAIN = 124,
 	MODELID_CHOPPER = 125,
+	MODELID_DODO = 126,
+	MODELID_COACH = 127,
+	MODELID_CABBIE = 128,
+	MODELID_STALLION = 129,
+	MODELID_RUMPO = 130,
+	MODELID_RCBANDIT = 131,
+	MODELID_BELLYUP = 132,
+	MODELID_MRWONGS = 133,
+	MODELID_MAFIA = 134,
+	MODELID_YARDIE = 135,
+	MODELID_YAKUZA = 136,
+	MODELID_DIABLOS = 137,
+	MODELID_COLUMB = 138,
+	MODELID_HOODS = 139,
 	MODELID_AIRTRAIN = 140,
 	MODELID_DEADDODO = 141,
-	MODELID_ESCAPE = 147,
-	MODELID_PREDATOR = 120,
 	MODELID_SPEEDER = 142,
 	MODELID_REEFER = 143,
+	MODELID_PANLANT = 144,
+	MODELID_FLATBED = 145,
+	MODELID_YANKEE = 146,
+	MODELID_ESCAPE = 147,
+	MODELID_BORGNINE = 148,
+	MODELID_TOYZ = 149,
 	MODELID_GHOST = 150,
+
+	// these crash when spawned
+//	MODELID_TRAIN = 124,
+//	MODELID_CHOPPER = 125,
+//	MODELID_AIRTRAIN = 140,
+//	MODELID_DEADDODO = 141,
+//	MODELID_ESCAPE = 147,
+//	MODELID_PREDATOR = 120,
+//	MODELID_SPEEDER = 142,
+//	MODELID_REEFER = 143,
+//	MODELID_GHOST = 150,
 };
 
 struct PathNode
@@ -124,8 +176,16 @@ spawnCar(int id)
 		FindPlayerCoors(&playerpos);
 		int node = ThePaths.FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0);
 		if(node >= 0){
-			CAutomobile *v = (CAutomobile*)CVehicle__new(0x5A8);
-			v = v->ctor(id, 2);
+			CVehicle *v;
+			if(CModelInfo::IsBoatModel(id)){
+				CBoat* boat = (CBoat*)CVehicle__new(0x484);
+				boat = boat->ctor(id, 1);
+				v = (CVehicle*)(boat);
+			}else{
+				CAutomobile *au = (CAutomobile*)CVehicle__new(0x5A8);
+				au = au->ctor(id, 2);
+				v = (CVehicle*)au;
+			}
 
 			DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, v, 0x19C));
 			DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, v, 0x19D));
@@ -164,6 +224,15 @@ PlayerPedInvincible(void)
 		pop	ebx
 		retn
 	}
+}
+
+int &maxwantedlevel = *(int*)0x5F7714;
+WRAPPER void CWanted__SetMaximumWantedLevel(int level){ EAXJMP(0x4ADAE0); }
+
+void
+setWantedLevel(void)
+{
+	CWanted__SetMaximumWantedLevel(maxwantedlevel);
 }
 
 int
@@ -225,6 +294,7 @@ delayedPatches10(int a, int b)
 				changePlayerModel(playerId);
 			}, 1, 0, 82, pednames);
 		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVar("Player", "Max Wanted level", &maxwantedlevel, setWantedLevel, 1, 0, 6, nil);
 
 		static int spawnCarId = 90;
 		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, 90, 150, carnames);
@@ -234,12 +304,7 @@ delayedPatches10(int a, int b)
 			   spawnCarId == MODELID_CHOPPER ||
 			   spawnCarId == MODELID_AIRTRAIN ||
 			   spawnCarId == MODELID_DEADDODO ||
-			   spawnCarId == MODELID_ESCAPE ||
-				// boats crash too
-			   spawnCarId == MODELID_PREDATOR ||
-			   spawnCarId == MODELID_SPEEDER ||
-			   spawnCarId == MODELID_REEFER ||
-			   spawnCarId == MODELID_GHOST)
+			   spawnCarId == MODELID_ESCAPE)
 				return;
 			spawnCar(spawnCarId);
 		});
@@ -247,29 +312,82 @@ delayedPatches10(int a, int b)
 		carCol1 = DebugMenuAddVar("Spawn", "First colour", &dummy, nil, 1, 0, 255, nil);
 		carCol2 = DebugMenuAddVar("Spawn", "Second colour", &dummy, nil, 1, 0, 255, nil);
 		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ spawnCar(MODELID_STINGER); });
-		DebugMenuAddCmd("Spawn", "Spawn Internus", [](){ spawnCar(MODELID_INFERNUS); });
+		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ spawnCar(MODELID_INFERNUS); });
 		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ spawnCar(MODELID_CHEETAH); });
 		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ spawnCar(MODELID_ESPERANTO); });
+		DebugMenuAddCmd("Spawn", "Spawn Stallion", [](){ spawnCar(MODELID_STALLION); });
+		DebugMenuAddCmd("Spawn", "Spawn Kuruma", [](){ spawnCar(MODELID_KURUMA); });
 		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ spawnCar(MODELID_TAXI); });
 		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ spawnCar(MODELID_POLICE); });
+		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ spawnCar(MODELID_ENFORCER); });
 		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ spawnCar(MODELID_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Yakuza", [](){ spawnCar(MODELID_YAKUZA); });
 		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ spawnCar(MODELID_DODO); });
+
+#ifdef GTA3D
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Ambulance", [](){ spawnCar(MODELID_AMBULAN); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Armour", [](){ spawnCar(MODELID_SECURICAR); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Armytruck", [](){ spawnCar(MODELID_BARRACKS); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Astrovan", [](){ spawnCar(MODELID_MOONBEAM); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Beamer", [](){ spawnCar(MODELID_SENTINEL); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Buggy", [](){ spawnCar(MODELID_BFINJECT); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Bus", [](){ spawnCar(MODELID_BUS); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Cabbie", [](){ spawnCar(MODELID_CABBIE); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Carrier", [](){ spawnCar(MODELID_BLISTA); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Chopper", [](){ spawnCar(MODELID_CHOPPER); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Coach", [](){ spawnCar(MODELID_COACH); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Dodo", [](){ spawnCar(MODELID_DODO); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Eldorado", [](){ spawnCar(MODELID_ESPERANTO); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Fire truck", [](){ spawnCar(MODELID_FIRETRUK); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Freight", [](){ spawnCar(MODELID_LINERUN); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Garbage", [](){ spawnCar(MODELID_TRASH); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Humvee", [](){ spawnCar(MODELID_PATRIOT); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Icecream", [](){ spawnCar(MODELID_MRWHOOP); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Intrepid", [](){ spawnCar(MODELID_KURUMA); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Limo", [](){ spawnCar(MODELID_STRETCH); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Luton", [](){ spawnCar(MODELID_MULE); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Nova", [](){ spawnCar(MODELID_PEREN); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Pickup", [](){ spawnCar(MODELID_BOBCAT); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Police boat", [](){ spawnCar(MODELID_PREDATOR); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Police", [](){ spawnCar(MODELID_POLICE); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Reliant", [](){ spawnCar(MODELID_MANANA); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Riviera", [](){ spawnCar(MODELID_IDAHO); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn SWAT van", [](){ spawnCar(MODELID_ENFORCER); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Tank", [](){ spawnCar(MODELID_RHINO); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Taxi", [](){ spawnCar(MODELID_TAXI); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Testeros", [](){ spawnCar(MODELID_CHEETAH); });
+		DebugMenuAddCmd("Spawn gta3d", "Spawn Transit", [](){ spawnCar(MODELID_PONY); });
+#endif
 
 		installColDebug();
 
 		InjectHook(0x4F0758, PlayerPedInvincible, PATCH_JUMP);
 	}
-	//void privatehooks(void);
-	//privatehooks();
+//	void privatehooks(void);
+//	privatehooks();
 
 	return RsEventHandler_orig(a, b);
 }
+
+int (*open_script_orig)(const char *path, const char *mode);
+int
+open_script(const char *path, const char *mode)
+{
+	if(GetAsyncKeyState('D') & 0x8000)
+		return open_script_orig("main_d.scm", mode);
+	if(GetAsyncKeyState('R') & 0x8000)
+		return open_script_orig("main_freeroam.scm", mode);
+	return open_script_orig(path, mode);
+}
+
 
 void
 patchIII10(void)
 {
 	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
+
+	InterceptCall(&open_script_orig, open_script, 0x438869);
+
 	// camera and similar stuff that's still in the game
 	debughooks();
 }

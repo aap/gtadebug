@@ -27,6 +27,8 @@ CPlayerPed::ProcessControl_hooked(void)
 DebugMenuEntry *carCol1;
 DebugMenuEntry *carCol2;
 
+WRAPPER void debug(char *fmt, ...) { EAXJMP(0x401000); }
+
 void
 spawnCar(int id)
 {
@@ -191,6 +193,43 @@ weatherChanged(void)
 	CWeather__Wind = 0.0f;
 }
 
+WRAPPER void *malloc_rw(int) { EAXJMP(0x661870); }
+void*
+malloc_wrap(int n)
+{
+	void *p = malloc_rw(n);
+	if(p == nil)
+		debug("NO MEMORY malloc");
+	return p;
+}
+
+WRAPPER void *calloc_rw(int, int) { EAXJMP(0x665B60); }
+void*
+calloc_wrap(int n, int m)
+{
+	void *p = calloc_rw(n, m);
+	if(p == nil)
+		debug("NO MEMORY calloc");
+	return p;
+}
+
+WRAPPER void *realloc_rw(void*, int) { EAXJMP(0x6618D0); }
+void*
+realloc_wrap(void *b, int n)
+{
+	void *p = realloc_rw(b, n);
+	if(p == nil)
+		debug("NO MEMORY realloc");
+	return p;
+}
+
+WRAPPER void free_rw(void*) { EAXJMP(0x6618A0); }
+void
+free_wrap(void *p)
+{
+	free_rw(p);
+}
+
 int
 delayedPatches10(int a, int b)
 {
@@ -303,6 +342,11 @@ patchVC10(void)
 	Patch(0x40AAAA + 3, csplayernames);
 	Patch(0x40AAB8 + 3, csplayernames);
 	Patch(0x40AA96 + 3, playernames);
+
+//	Patch(0x665B13 + 6, malloc_wrap);
+//	Patch(0x665B23 + 6, free_wrap);
+//	Patch(0x665B32 + 6, realloc_wrap);
+//	Patch(0x665B47 + 6, calloc_wrap);
 
 //	Nop(0x57C9D7, 5);
 

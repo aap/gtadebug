@@ -1,5 +1,12 @@
 // III
 
+class CGeneral
+{
+public:
+	static double GetATanOfXY(float x, float y);
+};
+
+
 struct CColSphere
 {
 	CVector center;
@@ -46,10 +53,10 @@ struct CColPoint
 	int pad1;
 	CVector normal;
 	int pad2;
-	byte surfaceTypeA;
-	byte pieceTypeA;
-	byte pieceTypeB;
-	byte surfaceTypeB;
+	uint8 surfaceA;
+	uint8 pieceA;
+	uint8 surfaceB;
+	uint8 pieceB;
 	float depth;
 };
 
@@ -126,6 +133,7 @@ struct CModelInfo
 {
 	static CBaseModelInfo **ms_modelInfoPtrs;
 	static CBaseModelInfo *GetModelInfo(const char *s, int id);
+	static bool IsBoatModel(int index);
 };
 
 
@@ -193,52 +201,233 @@ struct CEntityVMT
 
 struct CPhysical : CEntity
 {
-	int uAudioEntityId;
-	int unk1;
-	int field_6C;
-	int field_70;
-	int m_dwLastTimeCollided;
-	CVector vecMoveSpeed;
-	CVector vecTurnSpeed;
-	CVector vecShiftVector1;
-	CVector vecShiftVector2;
-	CVector vecShiftVector3;
-	CVector vecShiftVector4;
-	float fMass;
-	float fTurnMass;
+	int32 uAudioEntityId;
+	float unk1;
+	void *carTreadable;
+	void *pedTreadable;
+	uint32 m_nLastTimeCollided;
+	CVector m_vecMoveSpeed;
+	CVector m_vecTurnSpeed;
+	CVector m_vecMoveFriction;
+	CVector m_vecTurnFriction;
+	CVector m_vecMoveSpeedAvg;
+	CVector m_vecTurnSpeedAvg;
+	float m_fMass;
+	float m_fTurnMass;
 	float fForceMultiplier;
-	float fAirResistance;
-	int fElasticity;
+	float m_fAirResistance;
+	float fElasticity;
 	float fPercentSubmerged;
-	CVector vecCentreOfMass;
-	void *pEntryInfoNode;
-	int pMovingListNode;
-	char field_EC;
-	char field_ED;
-	char uCollidingNum;
-	char field_EF;
-	CEntity *pCollisionRecords[6];
-	float fTotSpeed;
+	CVector m_vecCentreOfMass;
+	void *entryInfoListNext;
+	void *pMovingListNode;
+	uint8 field_EC;
+	uint8 m_nStaticFrames;
+	uint8 m_nCollisionRecords;
+	uint8 m_unk2;
+	CEntity *m_aCollisionRecords[6];
+	float m_fDistanceTravelled;
 	float fCollisionPower;
 	float pPhysColliding;
 	CVector vecCollisionPower;
-	short wComponentCol;
-	char byteMoveFlags;
-	char byteCollFlags;
-	char byteLastCollType;
-	char byteZoneLevel;
-	short __padding;
+	int16 wComponentCol;
+	uint8 byteMoveFlags;
+	uint8 byteCollFlags;
+	uint8 byteLastCollType;
+	uint8 byteZoneLevel;
+	int16 __padding;
 
 	void ProcessControl(void);
+	CVector GetSpeed(CVector &v) { return m_vecMoveSpeed + m_vecMoveFriction + CrossProduct(m_vecTurnFriction + m_vecTurnSpeed, v); }
 };
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: wrong size");
 
+struct AnimBlendFrameData;
+struct CPed;
+
+struct LimbOrientation
+{
+	float phi;
+	float theta;
+};
+
+struct CPedIK
+{
+	CPed *ped;
+	LimbOrientation headOrient;
+	LimbOrientation torsoOrient;
+	LimbOrientation upperArmOrient;
+	LimbOrientation lowerArmOrient;
+	int flags;
+};
+
+struct CCollPoly
+{
+	CVector vecColPolyPoint1;
+	CVector vecColPolyPoint2;
+	CVector vecColPolyPoint3;
+	char bIsValidCollision;
+	char __fx0025[3];
+};
+
+struct CWeapon
+{
+	int nWeaponId;
+	int nWeaponState;
+	int nAmmoLoaded;
+	int nAmmoTotal;
+	int dwNextShotTime;
+	char bAddRotOffset;
+	char __f0015[3];
+};
+
 struct CPed : CPhysical
 {
-	int pad;
-
+	CCollPoly polyColliding;
+	int fCollisionSpeed;
+	char bfFlagsA;
+	char bfFlagsB;
+	char bfFlagsC;
+	char bfFlagsD;
+	char bfFlagsE;
+	char bfFlagsF;
+	char bfFlagsG;
+	char bfFlagsH;
+	char someFlags;
+	char pad_15D[3];
+	char bytePedStatus;
+	char field_161;
+	char pad_162[2];
+	int dwObjective;
+	int dwPrevObjective;
+	int field_16C;
+	int field_170;
+	int field_174;
+	int field_178;
+	int field_17C;
+	int field_180;
+	int dwPedFormation;
+	int dwFearFlags;
+	int pThreatEntity;
+	int fEventOrThreatX;
+	int fEventOrThreatY;
+	int dwEventType;
+	int pEventEntity;
+	int fAngleToEvent;
+	AnimBlendFrameData *pFrames[12];
+	int dwAnimGroupId;
+	int pVehicleAnim;
+	CVector2D vecAnimMoveDelta;
+	CVector vecOffsetSeek;
+	CPedIK stPedIK;
+	int fActionX;
+	int fActionY;
+	int dwActionTimer;
+	int dwAction;
+	int dwLastAction;
+	int dwMoveState;
+	int dwStoredActionState;
+	int dwPrevActionState;
+	int dwWaitState;
+	int dwWaitTimer;
+	int pPathNodesStates[8];
+	char stPathNodeStates[80];
+	__int16 wPathNodes;
+	__int16 wCurPathNode;
+	char bytePathState;
+	char pad_2B5[3];
+	int pNextPathNode;
+	int pLastPathNode;
+	int fHealth;
+	int fArmour;
+	__int16 wRouteLastPoint;
+	__int16 wRoutePoints;
+	__int16 wRoutePos;
+	__int16 wRouteType;
+	__int16 wRouteCurDir;
+	__int16 field_2D2;
+	int fMovedX;
+	int fMovedY;
+	int fRotationCur;
+	int fRotationDest;
+	float headingRate;
+	__int16 wEnterType;
+	__int16 wWalkAroundType;
+	int pCurPhysSurface;
+	CVector vecOffsetFromPhysSurface;
+	int pCurSurface;
+	CVector vecSeekVehicle;
+	int pSeekTarget;
+	int pVehicle;
+	char byteIsInVehicle;
+	char pad_315[3];
+	int field_318;
+	char field_31C;
+	char field_31D;
+	__int16 wPhoneId;
+	int dwLookingForPhone;
+	int dwPhoneTalkTimer;
+	int pLastAccident;
+	int dwPedType;
+	float *pPedStats;
+	int fFleeFromPosX;
+	int fFleeFromPosY;
+	int pFleeFrom;
+	int dwFleeTimer;
+	int field_344;
+	int dwLastThreatTimer;
+	int pVehicleColliding;
+	char byteStateUnused;
+	char pad_351[3];
+	int dwTimerUnused;
+	int pTargetUnused;
+	CWeapon weapons[13];
+	int field_494;
+	char currentWeapon;
+	char field_499;
+	char byteWepSkills;
+	char byteWepAccuracy;
+	int pPointGunAt;
+	CVector vecHitLastPos;
+	int dwLastHitState;
+	char byteFightFlags1;
+	char byteFightFlags2;
+	char pad_4B2[2];
+	int pPedFire;
+	int pPedFight;
+	int fLookDirection;
+	int dwWepModelID;
+	int dwLeaveCarTimer;
+	int dwGetUpTimer;
+	int dwLookTimer;
+	int dwStandardTimer;
+	int dwAttackTimer;
+	int dwLastHitTime;
+	int dwHitRecoverTimer;
+	int field_4E0;
+	int field_4E4;
+	int field_4E8;
+	int field_4EC;
+	char field_4F0;
+	char field_4F1;
+	char byteBodyPartBleeding;
+	char field_4F3;
+	int pNearPeds[10];
+	__int16 nNearPeds;
+	char byteLastDamWep;
+	char pad_51F;
+	char field_520;
+	char pad_521[3];
+	int dwTalkTimer;
+	__int16 wTalkTypeLast;
+	__int16 wTalkType;
+	CVector vecSeekPosEx;
+	int fSeekExAngle;
+	int field_53C;
 	bool IsPedInControl(void);
 };
+static_assert(offsetof(CPed, weapons) == 0x35C, "CPed: error");
+
 
 struct tHandlingData;
 
@@ -334,6 +523,12 @@ struct CAutomobile : CVehicle
 	CAutomobile *ctor(int id, uint8 type);
 };
 
+struct CBoat : CVehicle
+{
+	int pad;
+	CBoat *ctor(int id, uint8 type);
+};
+
 //
 // Camera
 //
@@ -369,7 +564,7 @@ struct CCam
 	float   f_Roll; //used for adding a slight roll to the camera in the
 	float	f_rollSpeed;
 	float   m_fSyphonModeTargetZOffSet;
-float unknown;
+float m_unknownZOffset;
 	float   m_fAmountFractionObscured;
 	float   m_fAlphaSpeedOverOneFrame; // 100
 	float   m_fBetaSpeedOverOneFrame;
@@ -447,6 +642,7 @@ float unknown;
 
 
 	void Process_Debug(float *vec, float a, float b, float c);
+	void Process_Kalvin(float*, float, float, float);
 	void GetVectorsReadyForRW(void);
 };
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
@@ -803,6 +999,11 @@ public:
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &OldMouseControllerState;
 	static bool &m_bMapPadOneToPadTwo;
+
+	bool GetLookBehindForCar(void);
+	bool GetLookBehindForPed(void);
+	bool GetLookLeft(void);
+	bool GetLookRight(void);
 
 	static CPad *GetPad(int);
 };

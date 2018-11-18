@@ -379,19 +379,19 @@ advancetimehook(void)
 	}
 }
 
-// TEMP TEMP TEMP
 IGInputPad *ginput;
+bool padswitch;
 void
 switchPad(void)
 {
-	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)TRUE);
+	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)padswitch);
 }
 
 void
 debughooks(void)
 {
-	InjectHook(0x459ABA, &CCam::Process_Debug);
-//	InjectHook(0x459ABA, &CCam::Process_Kalvin);
+//	InjectHook(0x459ABA, &CCam::Process_Debug);
+	InjectHook(0x459ABA, &CCam::Process_Kalvin);
 	InjectHook(0x46D56B, &CCamera::InitialiseCameraForDebugMode);
 	InjectHook(0x46D532, debugcamhook, PATCH_JUMP);
 	InjectHook(0x5052AA, togglehudhook, PATCH_JUMP);
@@ -412,12 +412,10 @@ debughooks(void)
 
 		DebugMenuAddCmd("Debug", "Toggle HUD", [](){ toggleHudSwitch = 1; });
 
-//		DebugMenuAddVarBool8("Debug", "Map Pad 1 -> Pad 2", (int8_t*)&CPad::m_bMapPadOneToPadTwo, nil);
-// TEMP TEMP TEMP
-//		if(GInput_Load(&ginput))
-//			DebugMenuAddCmd("Debug", "Switch Pad 1", switchPad);
+		if(GInput_Load(&ginput))
+			DebugMenuAddVarBool8("Debug", "Map Pad 1 -> Pad 2", (int8_t*)&padswitch, switchPad);
 
-//		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity translate", &sensPos, nil, 0.1f, 0.0f, 100.0f);
-//		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity rotate", &sensRot, nil, 0.1f, 0.0f, 100.0f);
+		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity translate", &sensPos, nil, 0.1f, 0.0f, 100.0f);
+		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity rotate", &sensRot, nil, 0.1f, 0.0f, 100.0f);
 	}
 }

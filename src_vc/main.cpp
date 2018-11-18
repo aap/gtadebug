@@ -43,21 +43,25 @@ spawnCar(int id)
 		FindPlayerCoors(&playerpos);
 		int node = ThePaths.FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0, 0, 0);
 		if(node >= 0){
-			CVehicle* pVehicle;
+			CVehicle *pVehicle;
 		
 			if(CModelInfo::IsBoatModel(id)){
 				CBoat* pVeh = (CBoat*)CVehicle__new(0x4C0);
 				pVeh = pVeh->ctor(id, 1);
-				pVehicle = dynamic_cast<CVehicle*>(pVeh);
+				pVehicle = (CVehicle*)(pVeh);
 			}else if (CModelInfo::IsBikeModel(id)){
 				CBike* pVeh = (CBike*)CVehicle__new(0x4EC);
 				pVeh = pVeh->ctor(id, 1);
-				pVehicle = dynamic_cast<CVehicle*>(pVeh);
+				pVehicle = (CVehicle*)(pVeh);
 			}else{
 				CAutomobile* pVeh = (CAutomobile*)CVehicle__new(0x5DC);
 				pVeh = pVeh->ctor(id, 1);
-				pVehicle = dynamic_cast<CVehicle*>(pVeh);
+				pVehicle = (CVehicle*)(pVeh);
 			}
+			// unlock doors
+			FIELD(int, pVehicle, 0x230) = 1;
+			// set player owned
+			FIELD(uint8, pVehicle, 0x1FB) |= 4;
 
 			DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, pVehicle, 0x1A0));
 			DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, pVehicle, 0x1A1));
@@ -184,13 +188,15 @@ changeCsPlayerModel(void)
 }
 
 float &CWeather__Wind = *(float*)0x97533C;
+float &CWeather__Rain = *(float*)0x975340;
+int &CWeather__StreamAfterRainTimer = *(int*)0x699EE0;
 
 void
 weatherChanged(void)
 {
-	// this doesn't get reset always for some reason and we'll have splashes
-	// at nice weather. so just do this:
 	CWeather__Wind = 0.0f;
+	CWeather__Rain = 0.0f;
+	CWeather__StreamAfterRainTimer = 0;
 }
 
 WRAPPER void *malloc_rw(int) { EAXJMP(0x661870); }
@@ -313,9 +319,22 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Spawn", "Spawn Sparrow", [](){ spawnCar(199); });
 		DebugMenuAddCmd("Spawn", "Spawn Sea Sparrow", [](){ spawnCar(177); });
 		DebugMenuAddCmd("Spawn", "Spawn Hunter", [](){ spawnCar(155); });
+
+		DebugMenuAddVarBool8("Debug", "Toggle Scene Edit", (int8*)0xA10B2D, nil);
 	}
 	patchDebugCam();
 	return RsEventHandler_orig(a, b);
+}
+
+int (*open_script_orig)(const char *path, const char *mode);
+int
+open_script(const char *path, const char *mode)
+{
+	if(GetAsyncKeyState('D') & 0x8000)
+		return open_script_orig("main_d.scm", mode);
+	if(GetAsyncKeyState('R') & 0x8000)
+		return open_script_orig("main_freeroam.scm", mode);
+	return open_script_orig(path, mode);
 }
 
 void
@@ -348,9 +367,11 @@ patchVC10(void)
 //	Patch(0x665B32 + 6, realloc_wrap);
 //	Patch(0x665B47 + 6, calloc_wrap);
 
-//	Nop(0x57C9D7, 5);
+//	Nop(0x57DD0A, 5);
 
 	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x5FFAFE);
+
+	InterceptCall(&open_script_orig, open_script, 0x4506E6);
 }
 
 BOOL WINAPI

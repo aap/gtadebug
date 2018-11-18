@@ -73,6 +73,7 @@ CCamera::InitialiseCameraForDebugMode(void)
 
 float sensPos = 1.0f;
 float sensRot = 1.0f;
+int mode;
 
 void
 CCam::Process_Kalvin(float*, float, float, float)
@@ -81,6 +82,13 @@ CCam::Process_Kalvin(float*, float, float, float)
 	float rightspeed = 0.0;
 	float upspeed = 0.0;
 	CPad *pad = CPad::GetPad(1);
+
+	if(JUSTDOWN(SELECT))
+		mode = !mode;
+	if(mode == 0){
+		Process_Debug(nil, 0, 0, 0);
+		return;
+	}
 
 	if(CTRLJUSTDOWN('C')){
 		if(controlMode == CONTROL_CAMERA) controlMode = CONTROL_PLAYER;
@@ -299,8 +307,8 @@ switchDebugHook(void)
 		push	dword ptr [ebp+0D4h]
 		push	[esp+38h]
 		push	eax
-//		call	CCam::Process_Kalvin
-		call	CCam::Process_Debug
+		call	CCam::Process_Kalvin
+//		call	CCam::Process_Debug
 		push	0x483E10
 		retn
 	}
@@ -480,10 +488,11 @@ togglehudhook(void)
 
 // TEMP TEMP TEMP
 IGInputPad *ginput;
+bool padswitch;
 void
 switchPad(void)
 {
-	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)TRUE);
+	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)padswitch);
 }
 
 void
@@ -513,12 +522,11 @@ patchDebugCam(void)
 
 //		DebugMenuAddVarBool8("Debug", "Map Pad 1 -> Pad 2", (int8_t*)&CPad::m_bMapPadOneToPadTwo, nil);
 // TEMP TEMP TEMP
-//		if(GInput_Load(&ginput))
-//			DebugMenuAddCmd("Debug", "Switch Pad 1", switchPad);
+		if(GInput_Load(&ginput))
+			DebugMenuAddVarBool8("Debug", "Map Pad 1 -> Pad 2", (int8_t*)&padswitch, switchPad);
 
-
-//		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity translate", &sensPos, nil, 0.1f, 0.0f, 100.0f);
-//		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity rotate", &sensRot, nil, 0.1f, 0.0f, 100.0f);
+		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity translate", &sensPos, nil, 0.1f, 0.0f, 100.0f);
+		DebugMenuAddFloat32("Debug", "KALVINCAM sensitivity rotate", &sensRot, nil, 0.1f, 0.0f, 100.0f);
 
 	}
 }

@@ -312,12 +312,12 @@ copyToRWHook(void)
 }
 
 
-// TEMP TEMP TEMP
 IGInputPad *ginput;
+bool padswitch;
 void
 switchPad(void)
 {
-	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)TRUE);
+	ginput->SendEvent(GINPUT_EVENT_FORCE_MAP_PAD_ONE_TO_PAD_TWO, (void*)padswitch);
 }
 
 void
@@ -341,10 +341,8 @@ patchDebugCam(void)
 		DebugMenuAddCmd("Debug", "Cycle Prev", [](){ PrevSavedCam(&TheCamera.Cams[2]); });
 		DebugMenuAddCmd("Debug", "Delete Camera Positions", DeleteSavedCams);
 
-// TEMP TEMP TEMP
 		if(GInput_Load(&ginput))
-			DebugMenuAddCmd("Debug", "Switch Pad 1", switchPad);
-
+			DebugMenuAddVarBool8("Debug", "Map Pad 1 -> Pad 2", (int8_t*)&padswitch, switchPad);
 
 		DebugMenuAddVarBool8("Debug", "Black bars", (int8*)0xB6F065, nil);
 	}

@@ -183,9 +183,13 @@ spawnCar(int id)
 				v = (CVehicle*)(boat);
 			}else{
 				CAutomobile *au = (CAutomobile*)CVehicle__new(0x5A8);
-				au = au->ctor(id, 2);
+				au = au->ctor(id, 1);
 				v = (CVehicle*)au;
 			}
+			// unlock doors
+			FIELD(int, v, 0x224) = 1;
+			// set player owned
+			FIELD(uint8, v, 0x1F7) |= 4;
 
 			DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, v, 0x19C));
 			DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, v, 0x19D));
@@ -234,6 +238,9 @@ setWantedLevel(void)
 {
 	CWanted__SetMaximumWantedLevel(maxwantedlevel);
 }
+
+float &CCarCtrl__CarDensityMultiplier = *(float*)0x5EC8B4;
+float &CPopulation__PedDensityMultiplier = *(float*)0x5FA56C;
 
 int
 delayedPatches10(int a, int b)
@@ -286,6 +293,8 @@ delayedPatches10(int a, int b)
 
 		DebugMenuAddVarBool32("Misc", "Draw LODs", &drawLODs, nil);
 		InterceptCall(&CRenderer__SetupBigBuildingVisibility_orig, CRenderer__SetupBigBuildingVisibility, 0x4A931D);
+		DebugMenuAddVar("Misc", "Ped Density", &CPopulation__PedDensityMultiplier, nil, 0.1f, 0.0f, 10.0f);
+		DebugMenuAddVar("Misc", "Car Density", &CCarCtrl__CarDensityMultiplier, nil, 0.1f, 0.0f, 10.0f);
 
 		static int playerId = 0;
 		e = DebugMenuAddVar("Player", "Player model", &playerId, [](){
@@ -358,6 +367,8 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Spawn gta3d", "Spawn Testeros", [](){ spawnCar(MODELID_CHEETAH); });
 		DebugMenuAddCmd("Spawn gta3d", "Spawn Transit", [](){ spawnCar(MODELID_PONY); });
 #endif
+
+		DebugMenuAddVarBool8("Debug", "Toggle Scene Edit", (int8*)0x95CD77, nil);
 
 		installColDebug();
 

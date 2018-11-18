@@ -162,13 +162,13 @@ delayedPatches(void)
 		DebugMenuAddCmd("Cheats|Spawn", "Stock Car 3", [](){ ((void (*)(void))0x43A4D0)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Stock Car 4", [](){ ((void (*)(void))0x43A4E0)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Hearse", [](){ ((void (*)(void))0x43A4F0)(); });
-		DebugMenuAddCmd("Cheats|Spawn", "Lovefist", [](){ ((void (*)(void))0x43A500)(); });
+		DebugMenuAddCmd("Cheats|Spawn", "Stretch", [](){ ((void (*)(void))0x43A500)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Trashmaster", [](){ ((void (*)(void))0x43A510)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Golfcart", [](){ ((void (*)(void))0x43A520)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Flyboy", [](){ ((void (*)(void))0x43A530)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Vortex", [](){ ((void (*)(void))0x43A540)(); });
 //		DebugMenuAddCmd("Cheats|Spawn", "Predator", [](){ ((void (*)(void))0x4395A0)(); });	// nop
-		DebugMenuAddCmd("Cheats|Spawn", "Apache", [](){ ((void (*)(void))0x43A550)(); });
+		DebugMenuAddCmd("Cheats|Spawn", "Hunter", [](){ ((void (*)(void))0x43A550)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Quad", [](){ ((void (*)(void))0x43A560)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Tanker", [](){ ((void (*)(void))0x43A570)(); });
 		DebugMenuAddCmd("Cheats|Spawn", "Dozer", [](){ ((void (*)(void))0x43A660)(); });

@@ -112,7 +112,7 @@ struct CPathFind {
 
 	int FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10);
 };
-CPathFind &ThePaths = *(CPathFind*)0x8F6754;
+CPathFind *ThePaths;
 WRAPPER int CPathFind::FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10) {  EAXJMP(0x42CC30); }
 
 static int isPlayerInvincible;
@@ -174,7 +174,7 @@ spawnCar(int id)
 	CStreaming__LoadAllRequestedModels(false);
 	if(CStreaming__ms_aInfoForModel[id].loadState == 1){
 		FindPlayerCoors(&playerpos);
-		int node = ThePaths.FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0);
+		int node = ThePaths->FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0);
 		if(node >= 0){
 			CVehicle *v;
 			if(CModelInfo::IsBoatModel(id)){
@@ -196,9 +196,9 @@ spawnCar(int id)
 			//if(id == MODELID_ESPERANTO)
 			//	FIELD(uchar, v, 0x19C) = 54;
 
-			v->matrix.matrix.pos.x = ThePaths.nodes[node].x;
-			v->matrix.matrix.pos.y = ThePaths.nodes[node].y;
-			v->matrix.matrix.pos.z = ThePaths.nodes[node].z + 4.0f;
+			v->matrix.matrix.pos.x = ThePaths->nodes[node].x;
+			v->matrix.matrix.pos.y = ThePaths->nodes[node].y;
+			v->matrix.matrix.pos.z = ThePaths->nodes[node].z + 4.0f;
 			float x = v->matrix.matrix.pos.x;
 			float y = v->matrix.matrix.pos.y;
 			float z = v->matrix.matrix.pos.z;
@@ -248,6 +248,7 @@ delayedPatches10(int a, int b)
 	// Get some pointers that are likely to be changed by various limit adjusters
 	CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**) *(int*)(0x49114F + 3);
 	CStreaming__ms_aInfoForModel = (CStreamingInfo*) (*(int*)(0x491171 + 4) - 9);
+	ThePaths = *(CPathFind**)(0x413A81 + 1);
 
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {
@@ -380,14 +381,40 @@ delayedPatches10(int a, int b)
 	return RsEventHandler_orig(a, b);
 }
 
-int (*open_script_orig)(const char *path, const char *mode);
-int
+static int ScriptToLoad = 0;
+static void* (*open_script_orig)(const char *path, const char *mode);
+void*
 open_script(const char *path, const char *mode)
 {
 	if(GetAsyncKeyState('D') & 0x8000)
-		return open_script_orig("main_d.scm", mode);
-	if(GetAsyncKeyState('R') & 0x8000)
-		return open_script_orig("main_freeroam.scm", mode);
+	{
+		ScriptToLoad = 1;
+		path = "main_d.scm";
+	}
+	else if(GetAsyncKeyState('R') & 0x8000)
+	{
+		ScriptToLoad = 2;
+		path = "main_freeroam.scm";
+	}
+	else
+	{
+		ScriptToLoad = 0;
+	}
+	return open_script_orig(path, mode);
+}
+
+static void* (*load_and_launch_mission_orig)(const char *path, const char *mode);
+void*
+load_and_launch_mission(const char *path, const char *mode)
+{
+	if(ScriptToLoad == 1)
+	{
+		path = "data\\main_d.scm";
+	}
+	else if(ScriptToLoad == 2)
+	{
+		path = "data\\main_freeroam.scm";
+	}
 	return open_script_orig(path, mode);
 }
 
@@ -398,6 +425,7 @@ patchIII10(void)
 	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
 
 	InterceptCall(&open_script_orig, open_script, 0x438869);
+	InterceptCall(&load_and_launch_mission_orig, load_and_launch_mission, 0x588E13);
 
 	// camera and similar stuff that's still in the game
 	debughooks();

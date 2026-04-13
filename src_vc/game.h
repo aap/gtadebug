@@ -222,7 +222,6 @@ struct CPathFind {
 
 	int FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10, char a11, char a12);
 };
-extern CPathFind &ThePaths;
 
 struct CWanted
 {

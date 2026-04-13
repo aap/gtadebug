@@ -27,6 +27,9 @@ CPlayerPed::ProcessControl_hooked(void)
 DebugMenuEntry *carCol1;
 DebugMenuEntry *carCol2;
 
+CPathFind *ThePaths;
+WRAPPER int CPathFind::FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10, char a11, char a12) {  EAXJMP(0x437150); }
+
 WRAPPER void debug(char *fmt, ...) { EAXJMP(0x401000); }
 
 void
@@ -41,7 +44,7 @@ spawnCar(int id)
 			CStreaming__SetModelTxdIsDeletable(id);
 		}
 		FindPlayerCoors(&playerpos);
-		int node = ThePaths.FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0, 0, 0);
+		int node = ThePaths->FindNodeClosestToCoors(playerpos.x, playerpos.y, playerpos.z, 0, 100.0f, 0, 0, 0, 0);
 		if(node >= 0){
 			CVehicle *pVehicle;
 		
@@ -66,9 +69,9 @@ spawnCar(int id)
 			DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, pVehicle, 0x1A0));
 			DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, pVehicle, 0x1A1));
 
-			pVehicle->_.matrix.matrix.pos.x = ThePaths.nodes[node].x*0.125f;
-			pVehicle->_.matrix.matrix.pos.y = ThePaths.nodes[node].y*0.125f;
-			pVehicle->_.matrix.matrix.pos.z = ThePaths.nodes[node].z*0.125f + 4.0f;
+			pVehicle->_.matrix.matrix.pos.x = ThePaths->nodes[node].x*0.125f;
+			pVehicle->_.matrix.matrix.pos.y = ThePaths->nodes[node].y*0.125f;
+			pVehicle->_.matrix.matrix.pos.z = ThePaths->nodes[node].z*0.125f + 4.0f;
 			float x = pVehicle->_.matrix.matrix.pos.x;
 			float y = pVehicle->_.matrix.matrix.pos.y;
 			float z = pVehicle->_.matrix.matrix.pos.z;
@@ -241,6 +244,7 @@ delayedPatches10(int a, int b)
 {
 	// Get some pointers that are likely to be changed by various limit adjusters
 	CStreaming__ms_aInfoForModel = (CStreamingInfo*) (*(int*)(0x4AE922 + 3) - 9);
+	ThePaths = *(CPathFind**)(0x41C4BC + 1);
 
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {

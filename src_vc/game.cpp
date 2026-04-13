@@ -21,10 +21,6 @@ WRAPPER bool CPed::IsPedInControl(void) { EAXJMP(0x501950); }
 WRAPPER CVehicle *CVehicle__new(int size) { EAXJMP(0x5BAB20); }
 WRAPPER void CWorld__Add(CEntity *e) { EAXJMP(0x4DB3F0); }
 
-CPathFind &ThePaths = *(CPathFind*)0x9B6E5C;
-WRAPPER int CPathFind::FindNodeClosestToCoors(float x, float y, float z, char a7, float f8, char a9, char a10, char a11, char a12) {  EAXJMP(0x437150); }
-
-
 WRAPPER void CDraw::SetFOV(float fov) { EAXJMP(0x54A2E0); }
 
 

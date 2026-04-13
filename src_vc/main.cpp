@@ -330,14 +330,40 @@ delayedPatches10(int a, int b)
 	return RsEventHandler_orig(a, b);
 }
 
-int (*open_script_orig)(const char *path, const char *mode);
-int
+static int ScriptToLoad = 0;
+static void* (*open_script_orig)(const char *path, const char *mode);
+void*
 open_script(const char *path, const char *mode)
 {
 	if(GetAsyncKeyState('D') & 0x8000)
-		return open_script_orig("main_d.scm", mode);
-	if(GetAsyncKeyState('R') & 0x8000)
-		return open_script_orig("main_freeroam.scm", mode);
+	{
+		ScriptToLoad = 1;
+		path = "main_d.scm";
+	}
+	else if(GetAsyncKeyState('R') & 0x8000)
+	{
+		ScriptToLoad = 2;
+		path = "main_freeroam.scm";
+	}
+	else
+	{
+		ScriptToLoad = 0;
+	}
+	return open_script_orig(path, mode);
+}
+
+static void* (*load_and_launch_mission_orig)(const char *path, const char *mode);
+void*
+load_and_launch_mission(const char *path, const char *mode)
+{
+	if(ScriptToLoad == 1)
+	{
+		path = "data\\main_d.scm";
+	}
+	else if(ScriptToLoad == 2)
+	{
+		path = "data\\main_freeroam.scm";
+	}
 	return open_script_orig(path, mode);
 }
 
@@ -376,6 +402,7 @@ patchVC10(void)
 	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x5FFAFE);
 
 	InterceptCall(&open_script_orig, open_script, 0x4506E6);
+	InterceptCall(&load_and_launch_mission_orig, load_and_launch_mission, 0x608C86);
 }
 
 BOOL WINAPI

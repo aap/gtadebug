@@ -242,6 +242,12 @@ setWantedLevel(void)
 float &CCarCtrl__CarDensityMultiplier = *(float*)0x5EC8B4;
 float &CPopulation__PedDensityMultiplier = *(float*)0x5FA56C;
 
+static char main_scm_name[64];
+static char data_main_scm_name[64];
+
+static const char* main_scm_name_orig;
+static const char* data_main_scm_name_orig;
+
 int
 delayedPatches10(int a, int b)
 {
@@ -249,6 +255,11 @@ delayedPatches10(int a, int b)
 	CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**) *(int*)(0x49114F + 3);
 	CStreaming__ms_aInfoForModel = (CStreamingInfo*) (*(int*)(0x491171 + 4) - 9);
 	ThePaths = *(CPathFind**)(0x413A81 + 1);
+
+	main_scm_name_orig = *(const char**)(0x438864 + 1);
+	data_main_scm_name_orig = *(const char**)(0x588E0E + 1);
+	Patch(0x438864 + 1, &main_scm_name);
+	Patch(0x588E0E + 1, &data_main_scm_name);
 
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {
@@ -381,51 +392,34 @@ delayedPatches10(int a, int b)
 	return RsEventHandler_orig(a, b);
 }
 
-static int ScriptToLoad = 0;
-static void* (*open_script_orig)(const char *path, const char *mode);
-void*
-open_script(const char *path, const char *mode)
+static void (*open_script_set_dir_orig)(void* path);
+static void open_script_set_dir(void* path)
 {
-	if(GetAsyncKeyState('D') & 0x8000)
+	open_script_set_dir_orig(path);
+
+	if((GetAsyncKeyState('D') & 0x8000) != 0)
 	{
-		ScriptToLoad = 1;
-		path = "main_d.scm";
+		strcpy_s(main_scm_name, "main_d.scm");
+		strcpy_s(data_main_scm_name, "data\\main_d.scm");
 	}
-	else if(GetAsyncKeyState('R') & 0x8000)
+	else if((GetAsyncKeyState('R') & 0x8000) != 0)
 	{
-		ScriptToLoad = 2;
-		path = "main_freeroam.scm";
+		strcpy_s(main_scm_name, "main_freeroam.scm");
+		strcpy_s(data_main_scm_name, "data\\main_freeroam.scm");
 	}
 	else
 	{
-		ScriptToLoad = 0;
+		strcpy_s(main_scm_name, main_scm_name_orig);
+		strcpy_s(data_main_scm_name, data_main_scm_name_orig);
 	}
-	return open_script_orig(path, mode);
 }
-
-static void* (*load_and_launch_mission_orig)(const char *path, const char *mode);
-void*
-load_and_launch_mission(const char *path, const char *mode)
-{
-	if(ScriptToLoad == 1)
-	{
-		path = "data\\main_d.scm";
-	}
-	else if(ScriptToLoad == 2)
-	{
-		path = "data\\main_freeroam.scm";
-	}
-	return open_script_orig(path, mode);
-}
-
 
 void
 patchIII10(void)
 {
 	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
 
-	InterceptCall(&open_script_orig, open_script, 0x438869);
-	InterceptCall(&load_and_launch_mission_orig, load_and_launch_mission, 0x588E13);
+	InterceptCall(&open_script_set_dir_orig, open_script_set_dir, 0x438859);
 
 	// camera and similar stuff that's still in the game
 	debughooks();
